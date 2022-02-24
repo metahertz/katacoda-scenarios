@@ -14,7 +14,7 @@ kubectl cluster-info --context kind-bridgecrew-workshop
 { echo "Checkov.io version:" } 2> /dev/null
 checkov --version
 
-{ echo "" } } 2> /dev/null
+{ echo "" } 2> /dev/null
 { echo "Yor.io version:" } 2> /dev/null
 docker run --tty --volume /root:/root bridgecrew/yor --version
 
