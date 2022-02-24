@@ -47,7 +47,9 @@
       }
     ],
     "intro": {
-      "text": "intro.md"
+      "text": "intro.md",
+      "courseData": "scripts/intro-bg.sh",
+      "code": "scripts/intro-fg.sh"
     },
     "finish": {
       "text": "finish.md"
