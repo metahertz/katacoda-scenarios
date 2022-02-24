@@ -30,4 +30,7 @@ cd ${WORKSHOP_HOMEDIR}; pipenv install checkov
 echo "Installing Yor..." | tee > /opt/.signals-intro-bg-status
 docker pull bridgecrew/yor
 
+echo "Cloning KustomizeGoat" | tee > /opt/.signals-intro-bg-status
+cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.git
+
 echo "done" >> /opt/.signals-intro-bg-finished
