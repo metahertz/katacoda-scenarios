@@ -53,7 +53,9 @@
       "text": "finish.md"
     }
   },
-  "environment": {},
+  "environment": {
+    "uilayout": "vscode-terminal"
+  },
   "backend": {
     "imageid": "ubuntu:2004"
   }
