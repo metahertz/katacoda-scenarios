@@ -5,9 +5,9 @@ WORKSHOP_HOMEDIR=/root
 
 echo "Welcome to the Bridgecrew K8S Workshop, lets get some quick setup details!"
 echo "Enter your forked kustomizegoat URL..." 
-read gitcloneurl
+read ; echo ${REPLY} > ${WORKSHOP_HOMEDIR}/.bcworkshop/gitcloneurl
 echo "Enter your Bridgecrew API Token..."
-read bridgecrewtoken
+read ; echo ${REPLY} > ${WORKSHOP_HOMEDIR}/.bcworkshop/bridgecrewtoken
 
 { echo "Waiting for initial workshop setup to complete..."; } 2>/dev/null
 
