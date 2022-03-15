@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 WORKSHOP_HOMEDIR=/root
 
 echo "Setting up KIND cli..." | tee > /opt/.signals-intro-bg-status
