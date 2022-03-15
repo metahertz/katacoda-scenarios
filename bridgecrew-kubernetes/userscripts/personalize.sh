@@ -38,7 +38,7 @@ spec:
   source:
     path: kustomize/overlays/dev
     repoURL: "$(cat ${WORKSHOP_HOMEDIR}/.bcworkshop/gitcloneurl)"
-    targetRevision: namespacing
+    targetRevision: HEAD
   project: default
   syncPolicy:
     automated:
@@ -62,7 +62,7 @@ spec:
   source:
     path: kustomize/overlays/prod
     repoURL: "$(cat ${WORKSHOP_HOMEDIR}/.bcworkshop/gitcloneurl)"
-    targetRevision: namespacing
+    targetRevision: HEAD
   project: default
   syncPolicy:
     automated:

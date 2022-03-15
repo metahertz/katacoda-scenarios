@@ -65,6 +65,8 @@ cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.
 
 echo "Cloning Workshop Utils..." | tee > /opt/.signals-intro-bg-status
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/metahertz/katacoda-scenarios.git
+chmod +x ${WORKSHOP_HOMEDIR}/katacoda-scenarios/bridgecrew-kubernetes/userscripts/*
+ln -s ${WORKSHOP_HOMEDIR}/userscripts ${WORKSHOP_HOMEDIR}/katacoda-scenarios/bridgecrew-kubernetes/userscripts
 
 
 echo "done" >> /opt/.signals-intro-bg-finished
