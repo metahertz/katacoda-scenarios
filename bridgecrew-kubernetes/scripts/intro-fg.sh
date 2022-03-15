@@ -2,13 +2,6 @@
 set +x
 WORKSHOP_HOMEDIR=/root
 
-mkdir ${WORKSHOP_HOMEDIR}/.bcworkshop
-echo "Welcome to the Bridgecrew K8S Workshop, lets get some quick setup details!"
-echo "Enter your forked kustomizegoat URL..." 
-read ; echo ${REPLY} > ${WORKSHOP_HOMEDIR}/.bcworkshop/gitcloneurl
-echo "Enter your Bridgecrew API Token..."
-read ; echo ${REPLY} > ${WORKSHOP_HOMEDIR}/.bcworkshop/bridgecrewtoken
-
 echo "Waiting for initial workshop setup to complete..."
 
 time while [ ! -f /opt/.signals-intro-bg-finished ] ; do tail /opt/.signals-intro-bg-status 2>/dev/null ; sleep 2; done; 
