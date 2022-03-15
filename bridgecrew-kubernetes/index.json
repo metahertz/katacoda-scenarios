@@ -56,7 +56,11 @@
     }
   },
   "environment": {
-    "uilayout": "vscode-terminal-split"
+    "showdashboard": true,
+    "dashboards": [{"name": "Bridgecrew Dashboard", "href": "https://bridgecrew.cloud"},
+        {"name": "ArgoCD UI", "port": 32443},
+        {"name": "ArgoCD UI 2", "href": "https://[[HOST_SUBDOMAIN]]-32443-[[KATACODA_HOST]].environments.katacoda.com"}],
+    "uilayout": "terminal-iframe"
   },
   "backend": {
     "imageid": "ubuntu:2004"
