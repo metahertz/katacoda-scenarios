@@ -63,5 +63,8 @@ docker pull bridgecrew/yor
 echo "Cloning KustomizeGoat..." | tee > /opt/.signals-intro-bg-status
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.git
 
+echo "Cloning Workshop Utils..." | tee > /opt/.signals-intro-bg-status
+cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/metahertz/katacoda-scenarios.git
+
 
 echo "done" >> /opt/.signals-intro-bg-finished
