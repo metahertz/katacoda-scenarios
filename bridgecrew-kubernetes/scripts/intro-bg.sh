@@ -55,7 +55,7 @@ apt install -y pipenv
 cd ${WORKSHOP_HOMEDIR}; pipenv --python 3.8
 
 echo "Installing Checkov..." | tee > /opt/.signals-intro-bg-status
-cd ${WORKSHOP_HOMEDIR}; pipenv install checkov
+docker pull bridgecrew/checkov
 
 echo "Installing Yor..." | tee > /opt/.signals-intro-bg-status
 docker pull bridgecrew/yor
