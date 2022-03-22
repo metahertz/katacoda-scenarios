@@ -1,10 +1,5 @@
-# Interactive Katacoda Scenarios
+# Bridgecrew DevSecOps Workshop with Kubernetes
 
-[![](http://shields.katacoda.com/katacoda/metahertz/count.svg)](https://www.katacoda.com/metahertz "Get your profile on Katacoda.com")
+This repo holds configuration and lab setup content for the [Bridgecrew.io](https://Bridgecrew.io) Kubernetes DevSecOps workshop to be hosted at [workshop.bridgecrew.io](https://workshop.bridgecrew.io)
 
-Visit https://www.katacoda.com/metahertz to view the profile and interactive scenarios
-
-### Writing Scenarios
-Visit https://www.katacoda.com/docs to learn more about creating Katacoda scenarios
-
-For examples, visit https://github.com/katacoda/scenario-example
+In the meantime, check out the other live workshops!
