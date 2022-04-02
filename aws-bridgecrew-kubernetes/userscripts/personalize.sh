@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-WORKSHOP_HOMEDIR=/root
+WORKSHOP_HOMEDIR=/home/ubuntu
 
 mkdir ${WORKSHOP_HOMEDIR}/.bcworkshop || true
 
