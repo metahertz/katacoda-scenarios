@@ -147,8 +147,8 @@ Resources:
           apt update
           apt install -y git docker.io 
           git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
-          sudo chmod +x ./kubernetes-devsecops-workshop/bridgecrew-kubernetes/scripts/intro-bg.sh 
-          sudo ./kubernetes-devsecops-workshop/bridgecrew-kubernetes/scripts/intro-bg.sh
+          sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh 
+          sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/intro-bg.sh
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       NetworkInterfaces:
