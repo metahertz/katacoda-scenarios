@@ -23,6 +23,8 @@ nodes:
     hostPort: 32443
     listenAddress: "0.0.0.0"
     protocol: tcp
+- role: worker
+- role: worker
 EOF
 
 echo "Setting up KIND cluster..."
