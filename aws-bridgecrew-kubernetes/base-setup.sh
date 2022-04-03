@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 WORKSHOP_USER=ubuntu
 WORKSHOP_HOMEDIR=/home/${WORKSHOP_USER}
+WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
 
 echo "Setting up KIND cli..."
 
@@ -9,7 +10,7 @@ chmod +x ./kind
 sudo mv ./kind /usr/bin/kind
 
 echo "Configuring KIND cluster environment..." 
-cd ${WORKSHOP_HOMEDIR}; cat > ./kind-config.yaml << EOF
+cat > ${WORKSHOP_AUTOMATION_DIR}/kind-config.yaml << EOF
 apiVersion: kind.x-k8s.io/v1alpha4
 kind: Cluster
 nodes:
@@ -28,7 +29,7 @@ nodes:
 EOF
 
 echo "Setting up KIND cluster..."
-cd ${WORKSHOP_HOMEDIR}; sudo /usr/bin/kind create cluster --name bridgecrew-workshop --config=kind-config.yaml
+cd ${WORKSHOP_AUTOMATION_DIR}; sudo /usr/bin/kind create cluster --name bridgecrew-workshop --config=kind-config.yaml
 
 echo "Installing kubectl cli..."
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -63,9 +64,10 @@ sudo docker pull bridgecrew/yor
 echo "Cloning KustomizeGoat..." 
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.git
 
-echo "Cloning Workshop Utils..." 
-cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
-chmod +x ${WORKSHOP_HOMEDIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts/*
+#Already done in cloud-init
+#echo "Cloning Workshop Utils..." 
+#cd ${WORKSHOP_AUTOMATION_DIR}; git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
+#chmod +x ${WORKSHOP_AUTOMATION_DIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts/*
 #ln -s ${WORKSHOP_HOMEDIR}/userscripts ${WORKSHOP_HOMEDIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts
 
 echo "done"

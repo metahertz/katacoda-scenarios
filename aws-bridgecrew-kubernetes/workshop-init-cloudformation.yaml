@@ -92,6 +92,7 @@ Resources:
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
+            sudo mv ./kubernetes-devsecops-workshop ./.bcworkshop/.
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       BlockDeviceMappings:
