@@ -74,6 +74,10 @@ Resources:
           Value: workshop.bridgecrew.io
     DependsOn:
       - WorkshopVPC
+      - WorkshopVPCInternetGW
+      - WorkshopSubnet
+      - WorkshopVPCInternetGW
+      - EC2R1ZK3C
   KindEC2:
     Type: 'AWS::EC2::Instance'
     Properties:
