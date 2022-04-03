@@ -140,18 +140,18 @@ Resources:
           IpProtocol: tcp
           ToPort: 22
         - CidrIp: 
-          !Join
-            - ''
-            - - !Ref YourPublicIP
-              - '/32'
+            !Join
+              - ''
+              - - !Ref YourPublicIP
+                - '/32'
           FromPort: 32443
           IpProtocol: tcp
           ToPort: 32443
         - CidrIp: 
-          !Join
-            - ''
-            - - !Ref YourPublicIP
-              - '/32'
+            !Join
+              - ''
+              - - !Ref YourPublicIP
+                - '/32'
           FromPort: 32080
           IpProtocol: tcp
           ToPort: 32080
@@ -174,24 +174,19 @@ Resources:
     Properties:
       KeyName: mj-ws-oregon-k8s-test
       UserData:
-        Fn::Base64: 
-          !Join
-          - '\n'
-          - - #!/bin/bash -xe 
-            - apt update
-            - apt install -y git docker.io
-            - git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
-            - sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
-            !Join
-            - ' '
-            - - sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh
-              - !Ref KustomizeForkURL
-              - !Ref UserBridgecrewAPI
-              - !Ref UserSSHKey
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            apt update
+            apt install -y git docker.io
+            git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
+            sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
+            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
+            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} ${UserSSHKey}
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       BlockDeviceMappings:
-        - DeviceName: /dev/sda
+        - DeviceName: /dev/nvme0
           Ebs:
             VolumeType: gp2
             VolumeSize: '100'
