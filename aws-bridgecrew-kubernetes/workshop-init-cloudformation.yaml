@@ -88,6 +88,23 @@ Metadata:
       dependson:
         - 2f5a3166-46a7-4084-a7b3-e7c4b779ca3c
         - b161ea9f-1d11-4637-803d-7f60cde8ea60
+Parameters:
+  UserSSHKey:
+    Type: String
+    Default: "" 
+    Description: Enter your SSH public key for workshop access.
+  UserBridgecrewAPI:
+    Type: String
+    Default: "" 
+    Description: Enter your Bridgecrew Cloud API key.
+  KustomizeForkURL:
+    Type: String
+    Default: "" 
+    Description: Enter your 'git clone' HTTPS address for your KustomizeGoat fork.
+  YourPublicIP:
+    Type: String
+    Default: "" 
+    Description: Enter your IPv4 Public IP to lock down Argo access for the workshop.
 Resources:
   bcK8sWorkshopCloud9:
     Type: 'AWS::Cloud9::EnvironmentEC2'
@@ -148,7 +165,8 @@ Resources:
           apt install -y git docker.io 
           git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
           sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh 
-          sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh 
+          sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
+          sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh "!Ref KustomizeForkURL" "!Ref UserBridgecrewAPI" "!Ref UserSSHKey" 
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       NetworkInterfaces:
