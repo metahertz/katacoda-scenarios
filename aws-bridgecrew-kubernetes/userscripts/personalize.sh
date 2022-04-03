@@ -1,7 +1,8 @@
 #!/usr/bin/bash
 WORKSHOP_HOMEDIR=/home/ubuntu
+WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
 
-mkdir ${WORKSHOP_HOMEDIR}/.bcworkshop || true
+mkdir ${WORKSHOP_AUTOMATION_DIR} || true
 
 echo "Welcome to the Bridgecrew K8S Workshop, lets get some quick setup details!"
 echo "Enter your forked kustomizegoat URL..." 
@@ -10,22 +11,20 @@ echo "Enter your Bridgecrew API Token..."
 read ; echo ${REPLY} > ${WORKSHOP_HOMEDIR}/.bcworkshop/bridgecrewtoken
 
 
-echo "Installing Checkov Kubernetes admission controller..." | tee > /opt/.signals-intro-bg-status
-curl -o ${WORKSHOP_HOMEDIR}/setup.sh https://raw.githubusercontent.com/bridgecrewio/checkov/master/admissioncontroller/setup.sh
-chmod +x ${WORKSHOP_HOMEDIR}/setup.sh
-sed -i 's/\/usr\/local\/opt\/openssl\/bin\/openssl/openssl/' setup.sh
-${WORKSHOP_HOMEDIR}/setup.sh bc-k8s-ws-cls1 $(cat ${WORKSHOP_HOMEDIR}/.bcworkshop/bridgecrewtoken)
+echo "Installing latest Checkov Kubernetes admission controller..." 
+curl -o ${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh https://raw.githubusercontent.com/bridgecrewio/checkov/master/admissioncontroller/setup.sh
+chmod +x ${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh
+sed -i 's/\/usr\/local\/opt\/openssl\/bin\/openssl/openssl/' checkov-admission-controller-setup.sh
+${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh bc-k8s-ws-cls1 $(cat ${WORKSHOP_AUTOMATION_DIR}/bridgecrewtoken)
 
 
+echo "Logging into to Argo via CLI..." 
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d > ${WORKSHOP_AUTOMATION_DIR}/.argo-password
+argocd login 127.0.0.1:32443 --insecure --username admin --password $(cat ${WORKSHOP_AUTOMATION_DIR}/.argo-password)
 
 
-echo "Logging into to Argo via CLI..." | tee > /opt/.signals-intro-bg-status
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d > ${WORKSHOP_HOMEDIR}/.bcworkshop/.argo-password
-argocd login 127.0.0.1:32443 --insecure --username admin --password $(cat ${WORKSHOP_HOMEDIR}/.bcworkshop/.argo-password)
-
-
-echo "Configuring ARGO example apps..." | tee > /opt/.signals-intro-bg-status
-cd ${WORKSHOP_HOMEDIR}; cat > .bcworkshop/argo-dev.yaml << EOF
+echo "Configuring ARGO example apps..." 
+cat > ${WORKSHOP_AUTOMATION_DIR}/argo-dev.yaml << EOF
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -37,7 +36,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     path: kustomize/overlays/dev
-    repoURL: "$(cat ${WORKSHOP_HOMEDIR}/.bcworkshop/gitcloneurl)"
+    repoURL: "$(cat ${WORKSHOP_AUTOMATION_DIR}/gitcloneurl)"
     targetRevision: HEAD
   project: default
   syncPolicy:
@@ -49,7 +48,7 @@ spec:
       - ApplyOutOfSyncOnly=true
 EOF
 
-cd ${WORKSHOP_HOMEDIR}; cat > .bcworkshop/argo-prod.yaml << EOF
+cat > ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml << EOF
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -61,7 +60,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     path: kustomize/overlays/prod
-    repoURL: "$(cat ${WORKSHOP_HOMEDIR}/.bcworkshop/gitcloneurl)"
+    repoURL: "$(cat ${WORKSHOP_AUTOMATION_DIR}/gitcloneurl)"
     targetRevision: HEAD
   project: default
   syncPolicy:
@@ -73,10 +72,8 @@ spec:
       - ApplyOutOfSyncOnly=true
 EOF
 
-
-
-echo "Configuring Argo APP deployments..." | tee > /opt/.signals-intro-bg-status
-argocd app create --file ${WORKSHOP_HOMEDIR}/.bcworkshop/argo-dev.yaml
-argocd app create --file ${WORKSHOP_HOMEDIR}/.bcworkshop/argo-prod.yaml
+echo "Configuring Argo APP deployments..."
+argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-dev.yaml
+argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml
 
 
