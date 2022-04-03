@@ -133,12 +133,28 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       VpcId: !Ref WorkshopVPC
-      GroupDescription: Enable SSH access via port 22
+      GroupDescription: Access for KIND Workshop host
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
           FromPort: 22
           IpProtocol: tcp
           ToPort: 22
+        - CidrIp: 
+          !Join
+            - ''
+            - - !Ref YourPublicIP
+              - '/32'
+          FromPort: 32443
+          IpProtocol: tcp
+          ToPort: 32443
+        - CidrIp: 
+          !Join
+            - ''
+            - - !Ref YourPublicIP
+              - '/32'
+          FromPort: 32080
+          IpProtocol: tcp
+          ToPort: 32080
       Tags:
         - Key: usage
           Value: Bridgecrew Workshop
