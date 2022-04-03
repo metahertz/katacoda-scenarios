@@ -37,7 +37,7 @@ metadata:
 spec:
   destination:
     name: ''
-    namespace: kustomizegoat
+    namespace: kustomizegoat-dev
     server: 'https://kubernetes.default.svc'
   source:
     path: kustomize/overlays/dev
@@ -61,7 +61,7 @@ metadata:
 spec:
   destination:
     name: ''
-    namespace: kustomizegoat
+    namespace: kustomizegoat-prod
     server: 'https://kubernetes.default.svc'
   source:
     path: kustomize/overlays/prod
