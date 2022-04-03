@@ -50,12 +50,8 @@ echo "Installing ArgoCD CLI..."
 cd ${WORKSHOP_HOMEDIR}; sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 cd ${WORKSHOP_HOMEDIR}; sudo chmod +x /usr/local/bin/argocd
 
-echo "Writing default Argo UI creds to ~/.argo-password" 
-cd ${WORKSHOP_HOMEDIR}; kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d > ${WORKSHOP_HOMEDIR}/.argo-password
-echo "" >> ${WORKSHOP_HOMEDIR}/.argo-password
-
 echo "Setting up pipenv..."
-apt sudo install -y pipenv
+sudo apt install -y pipenv
 cd ${WORKSHOP_HOMEDIR}; pipenv --python 3.8
 
 echo "Installing Checkov..."
@@ -70,6 +66,6 @@ cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.
 echo "Cloning Workshop Utils..." 
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
 chmod +x ${WORKSHOP_HOMEDIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts/*
-ln -s ${WORKSHOP_HOMEDIR}/userscripts ${WORKSHOP_HOMEDIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts
+#ln -s ${WORKSHOP_HOMEDIR}/userscripts ${WORKSHOP_HOMEDIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts
 
 echo "done"
