@@ -14,8 +14,8 @@ read ; echo ${REPLY} > ${WORKSHOP_HOMEDIR}/.bcworkshop/bridgecrewtoken
 echo "Installing latest Checkov Kubernetes admission controller..." 
 curl -o ${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh https://raw.githubusercontent.com/bridgecrewio/checkov/master/admissioncontroller/setup.sh
 chmod +x ${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh
-sed -i 's/\/usr\/local\/opt\/openssl\/bin\/openssl/openssl/' checkov-admission-controller-setup.sh
-${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh bc-k8s-ws-cls1 $(cat ${WORKSHOP_AUTOMATION_DIR}/bridgecrewtoken)
+sed -i 's/\/usr\/local\/opt\/openssl\/bin\/openssl/openssl/' ${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh
+cd ${WORKSHOP_AUTOMATION_DIR}; ${WORKSHOP_AUTOMATION_DIR}/checkov-admission-controller-setup.sh bc-k8s-ws-cls1 $(cat ${WORKSHOP_AUTOMATION_DIR}/bridgecrewtoken)
 
 
 echo "Logging into to Argo via CLI..." 
