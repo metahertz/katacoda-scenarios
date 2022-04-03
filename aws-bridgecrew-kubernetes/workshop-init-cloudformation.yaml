@@ -159,16 +159,28 @@ Resources:
       KeyName: mj-ws-oregon-k8s-test
       UserData:
         Fn::Base64: 
-          !Sub |
-          #!/bin/bash -xe 
-          apt update
-          apt install -y git docker.io 
-          git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
-          sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh 
-          sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
-          sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh "!Ref KustomizeForkURL" "!Ref UserBridgecrewAPI" "!Ref UserSSHKey" 
+          !Join
+          - '\n'
+          - - #!/bin/bash -xe 
+            - apt update
+            - apt install -y git docker.io
+            - git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
+            - sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
+            !Join
+            - ' '
+            - - sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh
+              - !Ref KustomizeForkURL
+              - !Ref UserBridgecrewAPI
+              - !Ref UserSSHKey
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: '100'
+            DeleteOnTermination: 'true'
+            Encrypted: 'true'
       NetworkInterfaces:
         - DeviceIndex: '0'
           AssociatePublicIpAddress: 'true'
