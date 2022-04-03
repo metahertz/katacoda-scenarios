@@ -1,93 +1,4 @@
 AWSTemplateFormatVersion: 2010-09-09
-Metadata:
-  'AWS::CloudFormation::Designer':
-    68d29b8e-c011-4f14-9dcd-6fb4b8f3108b:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: 340
-        'y': 140
-      z: 0
-      embeds: []
-      dependson:
-        - c04e921d-0430-4cd9-b805-fa900bc1a632
-    c04e921d-0430-4cd9-b805-fa900bc1a632:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: 80
-        'y': 270
-      z: 0
-      embeds: []
-      iscontainedinside:
-        - da130c73-62d7-418d-aa4d-f30ff1ab6140
-      dependson:
-        - 2f5a3166-46a7-4084-a7b3-e7c4b779ca3c
-    c834fd6c-911b-4bf6-84ad-f0ccaa2b724b:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: 70
-        'y': 170
-      z: 0
-      embeds: []
-      dependson:
-        - 77ec4f19-5597-47f5-a55e-2b4666a902a5
-    77ec4f19-5597-47f5-a55e-2b4666a902a5:
-      size:
-        width: 100
-        height: 80
-      position:
-        x: 50
-        'y': 20
-      z: 0
-      embeds: []
-    da130c73-62d7-418d-aa4d-f30ff1ab6140:
-      size:
-        width: 110
-        height: 80
-      position:
-        x: 260
-        'y': 20
-      z: 0
-      embeds: []
-      dependson:
-        - 77ec4f19-5597-47f5-a55e-2b4666a902a5
-    2f5a3166-46a7-4084-a7b3-e7c4b779ca3c:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: -50
-        'y': 190
-      z: 0
-      embeds: []
-      dependson:
-        - 77ec4f19-5597-47f5-a55e-2b4666a902a5
-    b161ea9f-1d11-4637-803d-7f60cde8ea60:
-      size:
-        width: 120
-        height: 110
-      position:
-        x: -140
-        'y': 20
-      z: 0
-      embeds: []
-    93545c58-57f0-4d2a-ab4b-f3aa87d62390:
-      size:
-        width: 60
-        height: 60
-      position:
-        x: -160
-        'y': 190
-      z: 0
-      embeds: []
-      dependson:
-        - 2f5a3166-46a7-4084-a7b3-e7c4b779ca3c
-        - b161ea9f-1d11-4637-803d-7f60cde8ea60
 Parameters:
   UserSSHKey:
     Type: String
@@ -124,9 +35,6 @@ Resources:
           Value: demo-workshop
         - Key: moreinfo
           Value: workshop.bridgecrew.io
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 68d29b8e-c011-4f14-9dcd-6fb4b8f3108b
     DependsOn:
       - KindEC2
   KindEC2SG:
@@ -164,9 +72,6 @@ Resources:
           Value: demo-workshop
         - Key: moreinfo
           Value: workshop.bridgecrew.io
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: c834fd6c-911b-4bf6-84ad-f0ccaa2b724b
     DependsOn:
       - WorkshopVPC
   KindEC2:
@@ -182,16 +87,16 @@ Resources:
             git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
-            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} ${UserSSHKey}
+            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       BlockDeviceMappings:
-        - DeviceName: /dev/nvme0
+        - DeviceName: /dev/sda1
           Ebs:
             VolumeType: gp2
             VolumeSize: '100'
             DeleteOnTermination: 'true'
-            Encrypted: 'true'
+            Encrypted: 'false'
       NetworkInterfaces:
         - DeviceIndex: '0'
           AssociatePublicIpAddress: 'true'
@@ -207,9 +112,6 @@ Resources:
           Value: demo-workshop
         - Key: moreinfo
           Value: workshop.bridgecrew.io
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: c04e921d-0430-4cd9-b805-fa900bc1a632
     DependsOn:
       - WorkshopVPCInternetGW
       - KindEC2SG
@@ -229,14 +131,8 @@ Resources:
           Value: demo-workshop
         - Key: moreinfo
           Value: workshop.bridgecrew.io
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 77ec4f19-5597-47f5-a55e-2b4666a902a5
   WorkshopSubnet:
     Type: 'AWS::EC2::Subnet'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: da130c73-62d7-418d-aa4d-f30ff1ab6140
     DependsOn:
       - WorkshopVPC
     Properties:
@@ -254,16 +150,10 @@ Resources:
   WorkshopVPCInternetGW:
     Type: 'AWS::EC2::InternetGateway'
     Properties: {}
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 2f5a3166-46a7-4084-a7b3-e7c4b779ca3c
     DependsOn:
       - WorkshopVPC
   EC2R1ZK3C:
     Type: 'AWS::EC2::Route'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 93545c58-57f0-4d2a-ab4b-f3aa87d62390
     Properties:
       RouteTableId: !Ref WorkshopVPCRouteTable
       DestinationCidrBlock: 0.0.0.0/0
@@ -273,9 +163,6 @@ Resources:
       - WorkshopVPCRouteTable
   WorkshopVPCRouteTable:
     Type: 'AWS::EC2::RouteTable'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: b161ea9f-1d11-4637-803d-7f60cde8ea60
     Properties:
       VpcId: !Ref WorkshopVPC
     DependsOn:
