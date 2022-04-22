@@ -3,6 +3,8 @@ WORKSHOP_USER=ubuntu
 WORKSHOP_HOMEDIR=/home/${WORKSHOP_USER}
 WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
 
+mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
+
 echo "Setting up KIND cli..."
 
 curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64

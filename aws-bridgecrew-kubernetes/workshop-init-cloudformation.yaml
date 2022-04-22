@@ -87,7 +87,7 @@ Resources:
           !Sub |
             #!/bin/bash -xe
             apt update
-            apt install -y git docker.io
+            apt install -y git docker.io awscli nodejs
             git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
