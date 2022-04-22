@@ -53,6 +53,26 @@ echo "Installing ArgoCD CLI..."
 cd ${WORKSHOP_HOMEDIR}; sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 cd ${WORKSHOP_HOMEDIR}; sudo chmod +x /usr/local/bin/argocd
 
+echo "Installing MetalLB for Docker Bridge L2 Subnet..."
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+sleep 1
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+cat > ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml << EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 172.18.255.10-172.18.255.250
+EOF
+kubectl apply -f ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml
+
 echo "Setting up pipenv..."
 sudo apt install -y pipenv
 cd ${WORKSHOP_HOMEDIR}; pipenv --python 3.8
@@ -65,11 +85,5 @@ sudo docker pull bridgecrew/yor
 
 echo "Cloning KustomizeGoat..." 
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.git
-
-#Already done in cloud-init
-#echo "Cloning Workshop Utils..." 
-#cd ${WORKSHOP_AUTOMATION_DIR}; git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
-#chmod +x ${WORKSHOP_AUTOMATION_DIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts/*
-#ln -s ${WORKSHOP_HOMEDIR}/userscripts ${WORKSHOP_HOMEDIR}/kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/userscripts
 
 echo "done"
