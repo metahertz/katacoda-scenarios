@@ -2,41 +2,57 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   UserSSHKey:
     Type: String
-    Default: "" 
+    Default: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDNzN/MyVI8KSzQnVOAG7TMtzAvLUo9mtJjmH0XBjOJlPO0BBjeb/izKR9zBkvap/fW9GfmVmuec5Y8N+i4DHTWmtE3Q8eWSeEOhryoPo+a+1AWmm/p0kC4xczzOgrSNrdvs5POmZrd/QLEDPtPgWlq6ib94gSmw4dNafeX3Co/CdPpnBlwrw/gh/RMWHAS0nVKKGmiUiAGEUPPBRNYc6EG7/wabm3meC/TNZ2jmQPrTGodapd/7r3Z930HeVf3jqi0Bs0mKBtFm9WTOWWPMAqaUI+eegnQRHapHi6/uxisVWsJHxEiPmm628YPWm+UkR3hTWLTojVPN0TXAJCbChgx1T0obtXx/mJ8zYFmFahJiBjfL3GWvgl9oRiVFRAHXMgV47Z6AHs+ZMk+L1PmUq9F74Pvpr+RK0AZK2LxER6mrHVB0IKNrp44DTvy81WmXgp8WZ31OLY3T2C//kgi2XfjmHxRQlIt+FgPfnmBvqdafq3km78rCQsq6t63DzqsDjCrPbiue4mMhNuYy4wVSj7mAJG4OM+PZUs6NUzQUzUk+X0XdxQwsjmWtUEprLVo7aHeLqkvOMCRvF9BnWiEBDBju+/5i/2vK39485c2X4fnZPERugidxoJXg3u3sl5Y++2+RdnyLxHbD2WqSMJGn+3YsSJnr6GCCtBHOh3Y/9nqEQ== matt@MJ_NG_PERSONAL" 
     Description: Enter your SSH public key for workshop access.
   UserBridgecrewAPI:
     Type: String
-    Default: "" 
+    Default: "bac4246c-bc7d-4b0d-80f5-fb1b43677409" 
     Description: Enter your Bridgecrew Cloud API key.
   KustomizeForkURL:
     Type: String
-    Default: "" 
+    Default: "https://github.com/metahertz/kustomizegoat.git" 
     Description: Enter your 'git clone' HTTPS address for your KustomizeGoat fork.
   YourPublicIP:
     Type: String
-    Default: "" 
+    Default: "88.98.254.194" 
     Description: Enter your IPv4 Public IP to lock down Argo access for the workshop.
 Resources:
-  bcK8sWorkshopCloud9:
-    Type: 'AWS::Cloud9::EnvironmentEC2'
+  WorkshopEC2InstanceRole:
+    Type: AWS::IAM::Role
     Properties:
-      AutomaticStopTimeMinutes: 20160
-      ConnectionType: CONNECT_SSH
-      Description: Cloud IDE for Bridgecrew Kubernetes workshop. Created by CloudFormation.
-      ImageId: amazonlinux-2-x86_64
-      InstanceType: t3.medium
-      Name: BC K8S Workshop Cloud9
-      Tags:
-        - Key: usage
-          Value: Bridgecrew Workshop
-        - Key: createdby
-          Value: Cloudformation
-        - Key: type
-          Value: demo-workshop
-        - Key: moreinfo
-          Value: workshop.bridgecrew.io
-    DependsOn:
-      - KindEC2
+      RoleName: demo-ec2-instance-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: allow-cloud9-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "cloud9:CreateEnvironmentSSH"
+                  - "cloud9:CreateEnvironmentToken"
+                  - "cloud9:DescribeEnvironments"
+                  - "cloud9:DescribeSSHRemote"
+                  - "cloud9:GetUserPublicKey"
+                  - "cloud9:ListEnvironments"
+                  - "cloud9:ValidateEnvironmentName"
+                Resource: '*'
+      Path: /
+  WorkshopEc2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: workshop-ec2-instance-profile
+      Path: /
+      Roles: 
+       - !Ref WorkshopEC2InstanceRole
   KindEC2SG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -76,7 +92,6 @@ Resources:
       - WorkshopVPC
       - WorkshopVPCInternetGW
       - WorkshopSubnet
-      - WorkshopVPCInternetGW
       - EC2R1ZK3C
   KindEC2:
     Type: 'AWS::EC2::Instance'
@@ -95,6 +110,7 @@ Resources:
             sudo mv ./kubernetes-devsecops-workshop ./.bcworkshop/.
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
+      IamInstanceProfile: !Ref WorkshopEc2InstanceProfile
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
@@ -117,9 +133,12 @@ Resources:
           Value: demo-workshop
         - Key: moreinfo
           Value: workshop.bridgecrew.io
+        - Key: kind
+          Value: yes
     DependsOn:
       - WorkshopVPCInternetGW
       - KindEC2SG
+      - WorkshopSubnet
   WorkshopVPC:
     Type: 'AWS::EC2::VPC'
     Properties:
@@ -166,12 +185,15 @@ Resources:
     DependsOn:
       - WorkshopVPCInternetGW
       - WorkshopVPCRouteTable
+      - WorkshopVPCGatewayAttachment
   WorkshopVPCRouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref WorkshopVPC
     DependsOn:
       - WorkshopVPC
+      - WorkshopVPCInternetGW
+      - WorkshopVPCGatewayAttachment
   WorkshopVPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties: 
@@ -188,3 +210,4 @@ Resources:
     DependsOn:
       - WorkshopVPCRouteTable
       - WorkshopSubnet
+      - WorkshopVPCGatewayAttachment
