@@ -2,19 +2,19 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   UserSSHKey:
     Type: String
-    Default: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDNzN/MyVI8KSzQnVOAG7TMtzAvLUo9mtJjmH0XBjOJlPO0BBjeb/izKR9zBkvap/fW9GfmVmuec5Y8N+i4DHTWmtE3Q8eWSeEOhryoPo+a+1AWmm/p0kC4xczzOgrSNrdvs5POmZrd/QLEDPtPgWlq6ib94gSmw4dNafeX3Co/CdPpnBlwrw/gh/RMWHAS0nVKKGmiUiAGEUPPBRNYc6EG7/wabm3meC/TNZ2jmQPrTGodapd/7r3Z930HeVf3jqi0Bs0mKBtFm9WTOWWPMAqaUI+eegnQRHapHi6/uxisVWsJHxEiPmm628YPWm+UkR3hTWLTojVPN0TXAJCbChgx1T0obtXx/mJ8zYFmFahJiBjfL3GWvgl9oRiVFRAHXMgV47Z6AHs+ZMk+L1PmUq9F74Pvpr+RK0AZK2LxER6mrHVB0IKNrp44DTvy81WmXgp8WZ31OLY3T2C//kgi2XfjmHxRQlIt+FgPfnmBvqdafq3km78rCQsq6t63DzqsDjCrPbiue4mMhNuYy4wVSj7mAJG4OM+PZUs6NUzQUzUk+X0XdxQwsjmWtUEprLVo7aHeLqkvOMCRvF9BnWiEBDBju+/5i/2vK39485c2X4fnZPERugidxoJXg3u3sl5Y++2+RdnyLxHbD2WqSMJGn+3YsSJnr6GCCtBHOh3Y/9nqEQ== matt@MJ_NG_PERSONAL" 
+    Default: "" 
     Description: Enter your SSH public key for workshop access.
   UserBridgecrewAPI:
     Type: String
-    Default: "bac4246c-bc7d-4b0d-80f5-fb1b43677409" 
+    Default: "" 
     Description: Enter your Bridgecrew Cloud API key.
   KustomizeForkURL:
     Type: String
-    Default: "https://github.com/metahertz/kustomizegoat.git" 
+    Default: "" 
     Description: Enter your 'git clone' HTTPS address for your KustomizeGoat fork.
   YourPublicIP:
     Type: String
-    Default: "88.98.254.194" 
+    Default: "" 
     Description: Enter your IPv4 Public IP to lock down Argo access for the workshop.
 Resources:
   WorkshopEC2InstanceRole:
