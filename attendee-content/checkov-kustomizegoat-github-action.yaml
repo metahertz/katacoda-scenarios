@@ -1,0 +1,22 @@
+name: Bridgecrew
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Bridgecrew 
+      id: Bridgecrew
+      uses: bridgecrewio/checkov-action@master
+      with:
+        api-key: ${{ secrets.BC_API_KEY }}
+        framework: kustomize
+        directory: kustomize/overlays/dev
+        output_format: sarif
