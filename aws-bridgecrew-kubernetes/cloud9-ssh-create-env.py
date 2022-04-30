@@ -10,7 +10,6 @@ from requests_aws4auth import AWS4Auth
 
 # Cloud9 Environment Details
 cloud9InstanceName = "bridgecrew-workshop"
-cloud9SshHost = "NEEDTOGETTHISFROMBOTO3"
 cloud9SshPort = "22"
 cloud9SshLoginName = "ubuntu"
 
@@ -34,6 +33,14 @@ except:
         print('No access key is available. Exiting')
         sys.exit()
 
+# Read public IPv4 address for use with Cloud9
+try:
+    publicIpv4Response = requests.get("http://169.254.169.254/latest/meta-data/public-ipv4")
+    cloud9SshHost = publicIpv4Response.text
+
+except:
+   print('No public IP available from metadata. Exiting')
+   sys.exit()
 
 method = 'POST'
 service = 'cloud9'
@@ -65,14 +72,19 @@ headers = {'Content-Type':content_type,
 
 #Get SSH Key for Instance Cloud9 Access 
 print('\nSSH PubKey Request...')
-r = requests.post(endpoint, data=request_parameters, headers=headers, verify=False, auth=auth )
+try:
+    r = requests.post(endpoint, data=request_parameters, headers=headers, verify=False, auth=auth )
 
-print('SSH PubKey Request, Response code: %d\n' % r.status_code)
-print(r.text)
+    print('SSH PubKey Request, Response code: %d\n' % r.status_code)
+    print(r.text)
 
-# Add SSH key to our authorized_keys ready for SSH Cloud9 Connection
-with open(f'/home/{cloud9SshLoginName}/.ssh/authorized_keys', 'a') as fd:
-    fd.write(f'\n{r.text}')
+    # Add SSH key to our authorized_keys ready for SSH Cloud9 Connection
+    with open(f'/home/{cloud9SshLoginName}/.ssh/authorized_keys', 'a') as fd:
+        fd.write(f'\n{r.text}')
+
+except:
+   print('Unable to request Public SSH key for Cloud9 setup. Exiting.')
+   sys.exit()
 
 print('\nCreate ENV Request...')
 print('Request URL = ' + endpoint)
