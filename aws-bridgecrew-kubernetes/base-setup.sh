@@ -5,6 +5,14 @@ WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
 
 mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
 
+echo "Extracting TGZ of Cloud9 compile/setup dir to save time..."
+apt install -y python2 
+#curl -L https://raw.githubusercontent.com/c9/install/master/install.sh | bash &
+curl -L -o cloud9.tgz https://github.com/metahertz/kubernetes-devsecops-workshop/blob/main/aws-bridgecrew-kubernetes/c9-installed.tgz?raw=true
+tar -xzvf cloud9.tgz
+cp -Rf /root/.c9 ${WORKSHOP_HOMEDIR}/.
+chown ubuntu ${WORKSHOP_HOMEDIR}/.c9
+
 echo "Setting up KIND cli..."
 
 curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
