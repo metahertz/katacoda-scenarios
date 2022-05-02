@@ -83,7 +83,7 @@ try:
 
     # Add SSH key to our authorized_keys ready for SSH Cloud9 Connection
     with open(f'/home/{cloud9SshLoginName}/.ssh/authorized_keys', 'a') as fd:
-        fd.write(f'\n{sshKeyforAuthorizedHosts}')
+        fd.write(f'{sshKeyforAuthorizedHosts}')
 
 except:
    print('Unable to request Public SSH key for Cloud9 setup. Exiting.')
