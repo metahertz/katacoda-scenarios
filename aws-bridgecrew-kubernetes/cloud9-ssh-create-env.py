@@ -77,10 +77,13 @@ try:
 
     print('SSH PubKey Request, Response code: %d\n' % r.status_code)
     print(r.text)
+    sshKeyforAuthorizedHosts = json.loads(r.text)
+    sshKeyforAuthorizedHosts = sshKeyforAuthorizedHosts['publicKey']
+
 
     # Add SSH key to our authorized_keys ready for SSH Cloud9 Connection
     with open(f'/home/{cloud9SshLoginName}/.ssh/authorized_keys', 'a') as fd:
-        fd.write(f'\n{r.text}')
+        fd.write(f'\n{sshKeyforAuthorizedHosts}')
 
 except:
    print('Unable to request Public SSH key for Cloud9 setup. Exiting.')

@@ -107,7 +107,8 @@ Resources:
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
-            sudo mv ./kubernetes-devsecops-workshop ./.bcworkshop/.
+            sudo pip install requests-aws4auth
+            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       IamInstanceProfile: !Ref WorkshopEc2InstanceProfile
