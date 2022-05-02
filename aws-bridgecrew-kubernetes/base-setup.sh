@@ -9,9 +9,22 @@ echo "Extracting TGZ of Cloud9 compile/setup dir to save time..."
 apt install -y python2 
 #curl -L https://raw.githubusercontent.com/c9/install/master/install.sh | bash &
 curl -L -o cloud9.tgz https://github.com/metahertz/kubernetes-devsecops-workshop/blob/main/aws-bridgecrew-kubernetes/c9-installed.tgz?raw=true
-tar -xzvf cloud9.tgz
+tar -xzf cloud9.tgz
 cp -Rf /.c9 ${WORKSHOP_HOMEDIR}/.
 chown -Rf ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/.c9
+#Unmess pre-installed symlinks that wanted to point to root.
+rm ${WORKSHOP_HOMEDIR}/.c9/node/bin/node-gyp
+ln -s ${WORKSHOP_HOMEDIR}/.c9/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js ${WORKSHOP_HOMEDIR}/.c9/node/bin/node-gyp
+chown ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/.c9/node/bin/node-gyp
+rm ${WORKSHOP_HOMEDIR}/.c9/bin/tmux
+ln -s ${WORKSHOP_HOMEDIR}/.c9/node/local/bin/tmux ${WORKSHOP_HOMEDIR}/.c9/bin/tmux
+chown ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/.c9/bin/tmux
+rm ${WORKSHOP_HOMEDIR}/.c9/bin/sqlite3
+ln -s ${WORKSHOP_HOMEDIR}/rm ${WORKSHOP_HOMEDIR}/.c9/lib/sqlite3/sqlite3 ${WORKSHOP_HOMEDIR}/.c9/bin/sqlite3
+chown ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/.c9/bin/sqlite3
+#Fix issue with finding valid terminfo for C9 Terminal
+mkdir -p /lib/terminfo/x
+cp /lib/terminfo/x/xterm-color /home/ubuntu/.terminfo/x/xterm-color
 
 echo "Setting up KIND cli..."
 
