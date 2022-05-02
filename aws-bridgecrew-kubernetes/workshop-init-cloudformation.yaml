@@ -114,13 +114,13 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash -xe
-            apt update
-            apt install -y git docker.io awscli nodejs
+            #apt update
+            #apt install -y git docker.io awscli nodejs
             git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
-            sudo pip install requests-aws4auth
+            #sudo pip install requests-aws4auth
             sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py ${AWSOrgID} ${AWSRoleID} ${AWSAssumedUser}
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
