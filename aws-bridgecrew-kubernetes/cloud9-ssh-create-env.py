@@ -5,7 +5,6 @@
 ### The API is undocumented, allowing creation only via the AWS console. Hence this script.
 
 import sys, os, datetime, json
-from tkinter import NE
 import requests 
 from requests_aws4auth import AWS4Auth
 
