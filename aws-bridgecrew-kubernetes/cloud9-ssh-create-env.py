@@ -5,6 +5,7 @@
 ### The API is undocumented, allowing creation only via the AWS console. Hence this script.
 
 import sys, os, datetime, json
+from tkinter import NE
 import requests 
 from requests_aws4auth import AWS4Auth
 
@@ -15,6 +16,11 @@ cloud9SshLoginName = "ubuntu"
 
 # EC2 Credentials role name
 ec2MetaIamRoleName = 'demo-ec2-instance-role'
+
+# Read in the AWS Account ID and user details so we can add the end user to the Cloud9 env
+awsOrgID = sys.argv[1]
+awsRoleID = sys.argv[2]
+awsAssumedUser = sys.argv[3]
 
 # Read EC2 IAM profile for creds, fallback to ENV
 try:
@@ -109,3 +115,29 @@ headers = {'Content-Type':content_type,
 r = requests.post(endpoint, data=request_parameters, headers=headers, verify=False, auth=auth )
 print('Env Creation Request, Response code: %d\n' % r.status_code)
 print(r.text)
+
+newEnironmentID = json.loads(r)
+newEnironmentID = newEnironmentID['environmentId']
+
+print('\nAdding workshop assumed role to env...')
+print('Request URL = ' + endpoint)
+
+amz_target = 'AWSCloud9WorkspaceManagementService.CreateEnvironmentMembership'
+request_parameters =  "{" + f'"environmentId":"{newEnironmentID}","userArn":"arn:aws:sts::{awsOrgID}:assumed-role/{awsRoleID}/{awsAssumedUser}","permissions":"read-write"' + "}"
+
+headers = {'Content-Type':content_type,
+           'Accept-Encoding':'identity',
+           'User-Agent':'aws-cli/2.4.25 Python/3.9.12 Darwin/20.6.0 source/x86_64 prompt/off command/cloud9.create-environment-membership',
+           'X-Amz-Target':amz_target,
+           'X-Amz-Date':amz_date,
+           'X-Amz-Security-Token': session_token,
+           'Connection': None,
+           'Accept': None,
+           
+           }
+
+r = requests.post(endpoint, data=request_parameters, headers=headers, verify=False, auth=auth )
+print('Env Sharing Request, Response code: %d\n' % r.status_code)
+print(r.text)
+
+

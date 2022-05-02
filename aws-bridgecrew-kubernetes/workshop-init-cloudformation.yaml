@@ -16,6 +16,18 @@ Parameters:
     Type: String
     Default: "" 
     Description: Enter your IPv4 Public IP to lock down Argo access for the workshop.
+  AWSOrgID:
+    Type: String
+    Default: "" 
+    Description: Your AWS Account ID.
+  AWSRoleID:
+    Type: String
+    Default: "" 
+    Description: The Role your User assumes.
+  AWSAssumedUser:
+    Type: String
+    Default: "" 
+    Description: Your Role assumed instance ID
 Resources:
   WorkshopEC2InstanceRole:
     Type: AWS::IAM::Role
@@ -44,6 +56,7 @@ Resources:
                   - "cloud9:GetUserPublicKey"
                   - "cloud9:ListEnvironments"
                   - "cloud9:ValidateEnvironmentName"
+                  - "cloud9:CreateEnvironmentMembership"
                 Resource: '*'
       Path: /
   WorkshopEc2InstanceProfile:
@@ -108,7 +121,7 @@ Resources:
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
             sudo pip install requests-aws4auth
-            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py
+            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py ${AWSOrgID} ${AWSRoleID} ${AWSAssumedUser}
       InstanceType: t3.medium
       ImageId: ami-0fb653ca2d3203ac1
       IamInstanceProfile: !Ref WorkshopEc2InstanceProfile
