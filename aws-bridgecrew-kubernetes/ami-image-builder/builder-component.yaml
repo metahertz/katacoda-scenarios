@@ -1,0 +1,50 @@
+name: K8sWorkshopImageBuilderSteps
+description: This adds pre-requisites to a new AMI image to save time on Workshop spinup.
+schemaVersion: 1.0
+
+phases:
+  - name: build
+    steps:
+      - name: AptAdditionsStep
+        action: ExecuteBash
+        inputs:
+          commands:
+            - apt update
+            - apt install -y git docker.io awscli nodejs python2 python3-pip
+      - name: PipAdditionsStep
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo pip3 install requests-aws4auth
+      - name: PreInstallCloud9Step
+        action: ExecuteBash
+        inputs:
+          commands:
+            - curl -L -o cloud9.tgz https://github.com/metahertz/kubernetes-devsecops-workshop/blob/main/aws-bridgecrew-kubernetes/c9-installed.tgz?raw=true
+            - tar -xzf ./cloud9.tgz
+            - cp -Rf ./.c9 /.c9
+      - name: InstallKindBinaries
+        action: ExecuteBash
+        inputs:
+          commands:
+            - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
+            - chmod +x ./kind
+            - sudo mv ./kind /usr/bin/kind
+      - name: InstallKubectlBinaries
+        action: ExecuteBash
+        inputs:
+          commands:
+            - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            - chmod +x ./kubectl
+            - sudo mv ./kubectl /usr/bin/kubectl
+      - name: InstallArgocdCliBinaries
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+            - sudo chmod +x /usr/local/bin/argocd        
+      - name: InstallBridgecrewTools
+        action: ExecuteBash
+        inputs:
+          commands:
+            - pip3 install checkov
