@@ -10,7 +10,7 @@ apt install -y python2
 #curl -L https://raw.githubusercontent.com/c9/install/master/install.sh | bash &
 curl -L -o cloud9.tgz https://github.com/metahertz/kubernetes-devsecops-workshop/blob/main/aws-bridgecrew-kubernetes/c9-installed.tgz?raw=true
 tar -xzvf cloud9.tgz
-cp -Rf /root/.c9 ${WORKSHOP_HOMEDIR}/.
+cp -Rf /.c9 ${WORKSHOP_HOMEDIR}/.
 chown ubuntu ${WORKSHOP_HOMEDIR}/.c9
 
 echo "Setting up KIND cli..."
