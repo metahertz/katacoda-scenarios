@@ -115,7 +115,7 @@ r = requests.post(endpoint, data=request_parameters, headers=headers, verify=Fal
 print('Env Creation Request, Response code: %d\n' % r.status_code)
 print(r.text)
 
-newEnironmentID = json.loads(r)
+newEnironmentID = json.loads(r.text)
 newEnironmentID = newEnironmentID['environmentId']
 
 print('\nAdding workshop assumed role to env...')
