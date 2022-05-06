@@ -97,26 +97,30 @@ except:
 print('\nCreate ENV Request...')
 print('Request URL = ' + endpoint)
 
-amz_target = 'AWSCloud9WorkspaceManagementService.CreateEnvironmentSSH'
-request_parameters =  "{" + f'"name":"{cloud9InstanceName}","clientRequestToken":"cloud9-console-73d36992-9b69-413c-8035-bf0ff4dc6d4bffff","tags":[],"host":"{cloud9SshHost}","port":{cloud9SshPort},"loginName":"{cloud9SshLoginName}","dryRun":"false"' + "}"
+newEnironmentID = ""
+envCreateResponse = 0
+while envCreateResponse != 200:
+    amz_target = 'AWSCloud9WorkspaceManagementService.CreateEnvironmentSSH'
+    request_parameters =  "{" + f'"name":"{cloud9InstanceName}","clientRequestToken":"cloud9-console-73d36992-9b69-413c-8035-bf0ff4dc6d4bffff","tags":[],"host":"{cloud9SshHost}","port":{cloud9SshPort},"loginName":"{cloud9SshLoginName}","dryRun":"false"' + "}"
 
-headers = {'Content-Type':content_type,
-           'Accept-Encoding':'identity',
-           'User-Agent':'aws-cli/2.4.25 Python/3.9.12 Darwin/20.6.0 source/x86_64 prompt/off command/cloud9.create-environment-ssh',
-           'X-Amz-Target':amz_target,
-           'X-Amz-Date':amz_date,
-           'X-Amz-Security-Token': session_token,
-           'Connection': None,
-           'Accept': None,
-           
-           }
+    headers = {'Content-Type':content_type,
+            'Accept-Encoding':'identity',
+            'User-Agent':'aws-cli/2.4.25 Python/3.9.12 Darwin/20.6.0 source/x86_64 prompt/off command/cloud9.create-environment-ssh',
+            'X-Amz-Target':amz_target,
+            'X-Amz-Date':amz_date,
+            'X-Amz-Security-Token': session_token,
+            'Connection': None,
+            'Accept': None,
+            
+            }
 
-r = requests.post(endpoint, data=request_parameters, headers=headers, verify=False, auth=auth )
-print('Env Creation Request, Response code: %d\n' % r.status_code)
-print(r.text)
+    r = requests.post(endpoint, data=request_parameters, headers=headers, verify=False, auth=auth )
+    print('Env Creation Request, Response code: %d\n' % r.status_code)
+    envCreateResponse = r.status_code
+    print(r.text)
+    newEnironmentID = json.loads(r.text)
+    newEnironmentID = newEnironmentID['environmentId']
 
-newEnironmentID = json.loads(r.text)
-newEnironmentID = newEnironmentID['environmentId']
 
 print('\nAdding workshop assumed role to env...')
 print('Request URL = ' + endpoint)
