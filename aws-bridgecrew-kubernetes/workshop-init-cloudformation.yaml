@@ -16,10 +16,6 @@ Parameters:
     Type: String
     Default: "" 
     Description: Enter your IPv4 Public IP to lock down Argo access for the workshop.
-  AWSOrgID:
-    Type: String
-    Default: ""
-    Description: Your AWS Account Number.
   AWSRoleID:
     Type: String
     Default: "TeamRole"
@@ -197,17 +193,19 @@ Resources:
     Properties:
       KeyName: workshop-base-keypair
       UserData:
-        Fn::Base64:
-          !Sub |
+        Fn::Base64: !Sub
+          - |
             #!/bin/bash -xe
             #apt update
             #apt install -y git docker.io awscli nodejs
             git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
-            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py ${AWSOrgID} ${AWSRoleID} ${AWSAssumedUser}
+            AWS_ACCOUNT_ID=${account_id}
+            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${AWSRoleID} ${AWSAssumedUser}
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
             #sudo pip install requests-aws4auth
+          - account_id: !Ref "AWS::AccountId"
       InstanceType: t3.medium
       ImageId: ami-0fb5600c07b4bc11f
       IamInstanceProfile: !Ref WorkshopEc2InstanceProfile
