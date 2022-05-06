@@ -7,6 +7,7 @@
 import sys, os, datetime, json
 import requests 
 from requests_aws4auth import AWS4Auth
+from time import sleep
 
 # Cloud9 Environment Details
 cloud9InstanceName = "bridgecrew-workshop"
@@ -99,9 +100,10 @@ print('Request URL = ' + endpoint)
 
 newEnironmentID = ""
 envCreateResponse = 0
+lastFourDigitsToken = 0000
 while envCreateResponse != 200:
     amz_target = 'AWSCloud9WorkspaceManagementService.CreateEnvironmentSSH'
-    request_parameters =  "{" + f'"name":"{cloud9InstanceName}","clientRequestToken":"cloud9-console-73d36992-9b69-413c-8035-bf0ff4dc6d4bffff","tags":[],"host":"{cloud9SshHost}","port":{cloud9SshPort},"loginName":"{cloud9SshLoginName}","dryRun":"false"' + "}"
+    request_parameters =  "{" + f'"name":"{cloud9InstanceName}","clientRequestToken":"cloud9-console-73d36992-9b69-413c-8035-bf0ff4dc6d4b{lastFourDigitsToken}","tags":[],"host":"{cloud9SshHost}","port":{cloud9SshPort},"loginName":"{cloud9SshLoginName}","dryRun":"false"' + "}"
 
     headers = {'Content-Type':content_type,
             'Accept-Encoding':'identity',
@@ -118,8 +120,11 @@ while envCreateResponse != 200:
     print('Env Creation Request, Response code: %d\n' % r.status_code)
     envCreateResponse = r.status_code
     print(r.text)
-    newEnironmentID = json.loads(r.text)
-    newEnironmentID = newEnironmentID['environmentId']
+    sleep(3)
+    lastFourDigitsToken = lastFourDigitsToken + 1
+
+newEnironmentID = json.loads(r.text)
+newEnironmentID = newEnironmentID['environmentId']
 
 
 print('\nAdding workshop assumed role to env...')
