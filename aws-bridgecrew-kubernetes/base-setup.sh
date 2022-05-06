@@ -106,5 +106,6 @@ sudo docker pull bridgecrew/yor
 
 echo "Cloning KustomizeGoat..." 
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.git
+chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/kustomizegoat
 
 echo "done"
