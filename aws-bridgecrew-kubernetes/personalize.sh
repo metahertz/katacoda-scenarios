@@ -52,6 +52,8 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 2
 EOF
 
 cat > ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml << EOF
@@ -76,6 +78,8 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 2
 EOF
 
 echo "Configuring Argo APP deployments..."
