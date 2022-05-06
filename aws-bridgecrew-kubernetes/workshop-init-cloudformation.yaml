@@ -19,7 +19,7 @@ Parameters:
   AWSOrgID:
     Type: String
     Default: "" 
-    Description: Your AWS Account ID.
+    Description: Your AWS Account Number.
   AWSRoleID:
     Type: String
     Default: "" 
@@ -202,12 +202,12 @@ Resources:
             #!/bin/bash -xe
             #apt update
             #apt install -y git docker.io awscli nodejs
-            git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git 
+            git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
+            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py ${AWSOrgID} ${AWSRoleID} ${AWSAssumedUser}
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
             #sudo pip install requests-aws4auth
-            sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py ${AWSOrgID} ${AWSRoleID} ${AWSAssumedUser}
       InstanceType: t3.medium
       ImageId: ami-0fb5600c07b4bc11f
       IamInstanceProfile: !Ref WorkshopEc2InstanceProfile
@@ -312,3 +312,10 @@ Resources:
       - WorkshopVPCRouteTable
       - WorkshopSubnet
       - WorkshopVPCGatewayAttachment
+Outputs:
+  PublicIp:
+    Description: Public IP address
+    Value: !GetAtt KindEC2.PublicIp
+  argoUri:
+    Description: ArgoCD URL
+    Value:  !Join [ "", [ "https://", !GetAtt KindEC2.PublicIp, ":32443" ] ]
