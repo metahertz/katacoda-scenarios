@@ -10,7 +10,7 @@ Parameters:
     Description: Enter your Bridgecrew Cloud API key.
   KustomizeForkURL:
     Type: String
-    Default: "" 
+    Default: "https://github.com/<YOUR_GIT_USERNAME>/kustomizegoat.git" 
     Description: Enter your 'git clone' HTTPS address for your KustomizeGoat fork.
   YourPublicIP:
     Type: String
