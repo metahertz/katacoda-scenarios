@@ -18,15 +18,15 @@ Parameters:
     Description: Enter your IPv4 Public IP to lock down Argo access for the workshop.
   AWSOrgID:
     Type: String
-    Default: "" 
+    Default: ""
     Description: Your AWS Account Number.
   AWSRoleID:
     Type: String
-    Default: "" 
+    Default: "TeamRole"
     Description: The Role your User assumes.
   AWSAssumedUser:
     Type: String
-    Default: "" 
+    Default: "MasterKey" 
     Description: Your Role assumed instance ID
 Resources:
   WorkshopEC2InstanceRole:
