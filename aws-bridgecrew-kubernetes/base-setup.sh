@@ -108,4 +108,8 @@ echo "Cloning KustomizeGoat..."
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/bridgecrewio/kustomizegoat.git
 chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/kustomizegoat
 
+echo "Fixing up botocore dep version for checkov see https://github.com/aws/aws-cli/issues/3092..."
+sudo apt -y remove python3-botocore
+pip3 install botocore
+
 echo "done"
