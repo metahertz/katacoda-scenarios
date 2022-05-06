@@ -25,6 +25,7 @@ until kubectl -n argocd get secret argocd-initial-admin-secret ; do echo "Still 
 
 echo "Logging into to Argo via CLI..." 
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d > ${WORKSHOP_AUTOMATION_DIR}/.argo-password
+echo "" >> ${WORKSHOP_AUTOMATION_DIR}/.argo-password
 
 until argocd login 127.0.0.1:32443 --insecure --username admin --password $(cat ${WORKSHOP_AUTOMATION_DIR}/.argo-password) ; do sleep 2; echo "Waiting on sucessful argo login..." ; done
 
