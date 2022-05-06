@@ -78,7 +78,6 @@ spec:
 EOF
 
 echo "Configuring Argo APP deployments..."
-argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-dev.yaml
-argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml
-
+until argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-dev.yaml ; do sleep 2; echo "Waiting on sucessful argo app creation (dev)..." ; done
+until argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml ; do sleep 2; echo "Waiting on sucessful argo app creation (prod)..." ; done
 
