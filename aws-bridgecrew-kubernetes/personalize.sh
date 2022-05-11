@@ -87,6 +87,6 @@ until argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-dev.yaml ; do sle
 until argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml ; do sleep 2; echo "Waiting on sucessful argo app creation (prod)..." ; done
 
 echo "Workaround integration-before-integration bug by running a checkov API scan..."
-checkov -f ${WORKSHOP_HOMEDIR}/kustomizegoat/kustomize/base/service.yaml --framework kubernetes --bc-api-key ${1} 
+until checkov -f ${WORKSHOP_HOMEDIR}/kustomizegoat/kustomize/base/service.yaml --framework kubernetes --bc-api-key ${1} ; do sleep 2; echo "Waiting on checkov API key run..." ; done
 
 cp /var/log/cloud-init-output.log ${WORKSHOP_HOMEDIR}/AUTOMATION_COMPLETE
