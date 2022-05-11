@@ -88,3 +88,5 @@ until argocd app create --file ${WORKSHOP_AUTOMATION_DIR}/argo-prod.yaml ; do sl
 
 echo "Workaround integration-before-integration bug by running a checkov API scan..."
 checkov -f ${WORKSHOP_HOMEDIR}/kustomizegoat/kustomize/base/service.yaml --framework kubernetes --bc-api-key ${1} 
+
+cp /var/log/cloud-init-output.log ${WORKSHOP_HOMEDIR}/AUTOMATION_COMPLETE
