@@ -50,7 +50,7 @@ except:
 
 method = 'POST'
 service = 'cloud9'
-region = 'us-east-2'
+region = 'us-west-2'
 host = f'{service}.{region}.amazonaws.com'
 endpoint = f'https://{service}.{region}.amazonaws.com/'
 content_type = 'application/x-amz-json-1.1'
