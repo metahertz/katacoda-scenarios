@@ -1,9 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
-  UserSSHKey:
-    Type: String
-    Default: "" 
-    Description: Enter your SSH public key for workshop access.
   UserBridgecrewAPI:
     Type: String
     Default: "" 
@@ -203,11 +199,11 @@ Resources:
             sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${AWSRoleID} ${AWSAssumedUser}
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/base-setup.sh
-            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "${UserSSHKey}"
+            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-kubernetes/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCjJzEo6HDD+dvvDId++VIynPBNspYSebF9aoYTUzoX0ge0w9MkLDCis4/SAQlGViNBOamPvIlP/ATGIDRQRS/S+l+YdILb0Q5vIKeE7tyKlMjROOpJWm9f+nj5uSR7WyoFLLy8QHcrG3xc1YPRvk0UQsNH0eDrJWt47vzu2mXLX4vpffTy+8WBr/fSOo532OQCloApziQ/SPFLE9j191z4i4HN98sO80/be15HfnN8p4WxSCUQ2iZfo0oMTOjI+CH//yTdC+eBa39bLO12XADxpcKeNWCj3j8FfuiuTzMT5TEO3K7sJIXpi2rKywMC0FWvMWB7Jo+aCVti+HX2WlThptDzeTJCcOWdzie5/zLU60sCdx5Ksn1w5lpjGOoS5vkeRKJk1GBJFzAvdXhC9DdEWy4J3PTnprpdcIRVJ3ZEdbbEZli5Yex4Mwt2tR1PgnxwnSP5wnyeNNbO7yWzH9Y1uXzY5x6cojZKfTypQ8ocYh0oTtEvyTmZnRGM1j8rGTE= matt@M-C02D83M3MD6R"
             #sudo pip install requests-aws4auth
           - account_id: !Ref "AWS::AccountId"
       InstanceType: t3.medium
-      ImageId: ami-0fb5600c07b4bc11f
+      ImageId: ami-0c943b80df4b831ee
       IamInstanceProfile: !Ref WorkshopEc2InstanceProfile
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
