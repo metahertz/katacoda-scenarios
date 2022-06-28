@@ -26,11 +26,11 @@ cd ${WORKSHOP_HOMEDIR}; git clone ${GITCLONEURL}
 chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/terragoat
 
 echo "Pulling IAM EC2 Instance role credentials to ENV for terraform cloud setup... "
-python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py
+python3 /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py
 
 echo "Configuring Terraform Cloud..."
 cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ; terraform init 
-cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ;  terraform apply -var="tfc_token=${TFCTOKEN}" -var="tfc_org_name=bc-${GHUSERNAME}" -var="github_pat=${GHTOKEN}" -var="terragoat_fork_name=${TERRAGOATFORKNAME}" -var="bc_api_key=${BRIDGECREWTOKEN}" -var="awsAccessKeyId=${AWS_ACCESS_KEY_ID}" -var="awsSecretAccessKey=${AWS_SECRET_ACCESS_KEY}" -var="awsSessionToken=${AWS_SESSION_TOKEN}" 
+cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ;  terraform apply -auto-approve -var="tfc_token=${TFCTOKEN}" -var="tfc_org_name=bc-${GHUSERNAME}" -var="github_pat=${GHTOKEN}" -var="terragoat_fork_name=${TERRAGOATFORKNAME}" -var="bc_api_key=${BRIDGECREWTOKEN}" -var="awsAccessKeyId=${AWS_ACCESS_KEY_ID}" -var="awsSecretAccessKey=${AWS_SECRET_ACCESS_KEY}" -var="awsSessionToken=${AWS_SESSION_TOKEN}" 
 
 
 cp /var/log/cloud-init-output.log ${WORKSHOP_HOMEDIR}/AUTOMATION_COMPLETE
