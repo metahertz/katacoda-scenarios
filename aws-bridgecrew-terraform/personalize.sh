@@ -29,8 +29,11 @@ echo "Pulling IAM EC2 Instance role credentials to ENV for terraform cloud setup
 python3 /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py
 
 echo "Configuring Terraform Cloud..."
-cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ; terraform init 
-cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ;  terraform apply -auto-approve -var="tfc_token=${TFCTOKEN}" -var="tfc_org_name=bc-${GHUSERNAME}" -var="github_pat=${GHTOKEN}" -var="terragoat_fork_name=${TERRAGOATFORKNAME}" -var="bc_api_key=${BRIDGECREWTOKEN}" -var="awsAccessKeyId=${AWS_ACCESS_KEY_ID}" -var="awsSecretAccessKey=${AWS_SECRET_ACCESS_KEY}" -var="awsSessionToken=${AWS_SESSION_TOKEN}" 
+# TFC ORG's need to be globally unique, TF apply will fail if not. 
+# We add the last 4 digits of the current unix epoch to try and help this!
+TFUNIQUETIMESTAMP=`date +%s |tail -c 5 |tr -d '\n'`
+cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ; until terraform init ; do sleep 2 ; echo "Retrying terraform init..." ; done
+cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ; until terraform apply -auto-approve -var="tfc_token=${TFCTOKEN}" -var="tfc_org_name=bc-${GHUSERNAME}-${TFUNIQUETIMESTAMP}" -var="github_pat=${GHTOKEN}" -var="terragoat_fork_name=${TERRAGOATFORKNAME}" -var="bc_api_key=${BRIDGECREWTOKEN}" -var="awsAccessKeyId=${AWS_ACCESS_KEY_ID}" -var="awsSecretAccessKey=${AWS_SECRET_ACCESS_KEY}" -var="awsSessionToken=${AWS_SESSION_TOKEN}" do sleep 2 ; echo "Retrying terraform apply..." ; done
 
 
 cp /var/log/cloud-init-output.log ${WORKSHOP_HOMEDIR}/AUTOMATION_COMPLETE
