@@ -96,3 +96,7 @@ resource "tfe_variable" "awsSessionToken" {
   description  = "AWS session token"
   sensitive     = true
 }
+
+output "tfe_workspace_id" {
+  value = tfe_workspace.bridgecrewWorkspace.id
+}
