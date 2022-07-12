@@ -14,8 +14,8 @@ Parameters:
     Description: Your github Personal Access Token (PAT).   
   KustomizeForkURL:
     Type: String
-    Default: "https://github.com/<YOUR_GIT_USERNAME>/kustomizegoat.git" 
-    Description: Enter your 'git clone' HTTPS address for your KustomizeGoat fork.
+    Default: "https://github.com/<YOUR_GIT_USERNAME>/terragoat.git" 
+    Description: Enter your 'git clone' HTTPS address for your TerraGoat fork.
   AWSRoleID:
     Type: String
     Default: "TeamRole"
