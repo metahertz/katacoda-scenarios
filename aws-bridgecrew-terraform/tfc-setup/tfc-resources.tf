@@ -64,7 +64,7 @@ resource "tfe_workspace" "bridgecrewWorkspace" {
   name         = "bridgecrew-workshop"
   organization = tfe_organization.workshopTFEOrg.id
   vcs_repo {
-    identifier         = "metahertz/terragoat"
+    identifier         = var.terragoat_fork_name
     branch             = "master"
     ingress_submodules = false
     oauth_token_id     = tfe_oauth_client.workshopGitHubOauth.oauth_token_id
