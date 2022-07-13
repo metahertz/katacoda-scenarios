@@ -37,7 +37,16 @@ cd /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup ; until ter
 terraform output -json | jq -r '@sh "export TFEWORKSPACEID=\(.tfe_workspace_id.value)"'
 
 echo "Create TFC BC Integration..."
-until curl 'https://www.bridgecrew.cloud/api/v1/integrations' -X POST -H 'Host: www.bridgecrew.cloud' -H 'Accept: application/json, text/plain, */*' -H "Authorization: Bearer ${BRIDGECREWTOKEN}" -H 'Content-Type: application/json; charset=UTF-8' -d "{"type":"terraformCloud","alias":"tfCloud","params":{"active":true,"workspace_id":"${TFEWORKSPACEID}","description":"Terraform Cloud integration via Bridgecrew Workshop","workspace_name":"bridgecrew-workshop","token":"${TFCTOKEN}"}}" ; do sleep 5 ; echo "Retrying BC Integration API for TFC..." ; done
+
+until curl -v "https://www.bridgecrew.cloud/api/v1/integrations" \
+-X POST \
+-H 'Host: www.bridgecrew.cloud' \
+-H "Authorization: Bearer ${BRIDGECREWTOKEN}" \
+-H 'Connection: keep-alive' \
+-H 'Accept: application/json, text/plain, */*' \
+-H 'content-type: application/json; charset=UTF-8' \
+-d '{"type":"terraformCloud","alias":"tfCloud","params":{"active":true,"workspace_id":"${TFEWORKSPACEID}","description":"Terraform Cloud integration via Bridgecrew Workshop","workspace_name":"bridgecrew-workshop","token":"${TFCTOKEN}"}}' \
+ ; do sleep 5 ; echo "Retrying BC Integration API for TFC..." ; done
 
 
 cp /var/log/cloud-init-output.log ${WORKSHOP_HOMEDIR}/AUTOMATION_COMPLETE

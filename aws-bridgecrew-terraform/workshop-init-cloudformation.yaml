@@ -116,7 +116,7 @@ Resources:
             sudo python3 ./kubernetes-devsecops-workshop/aws-bridgecrew-terraform/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${AWSRoleID} ${AWSAssumedUser}
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-bridgecrew-terraform/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-terraform/base-setup.sh
-            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-terraform/personalize.sh ${KustomizeForkURL} ${UserBridgecrewAPI} ${TFCUserToken} ${GHPat} 
+            sudo ./kubernetes-devsecops-workshop/aws-bridgecrew-terraform/personalize.sh "${KustomizeForkURL}" "${UserBridgecrewAPI}" "${TFCUserToken}" "${GHPat}" 
           - account_id: !Ref "AWS::AccountId"
       InstanceType: t3.medium
       ImageId: ami-0c943b80df4b831ee

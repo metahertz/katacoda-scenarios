@@ -27,8 +27,8 @@ mkdir -p ${WORKSHOP_HOMEDIR}/.terminfo/x
 cp /lib/terminfo/x/xterm-color /home/ubuntu/.terminfo/x/xterm-color
 
 
-echo "Setting up pipenv..."
-#sudo apt install -y pipenv
+echo "Installing JQ..."
+sudo apt install -y jq
 #cd ${WORKSHOP_HOMEDIR}; pipenv --python 3.8
 
 echo "Installing Checkov..."
