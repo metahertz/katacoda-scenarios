@@ -21,9 +21,11 @@ echo $4 >> ${WORKSHOP_HOMEDIR}/.bcworkshop/ghtoken
 GHUSERNAME=`echo ${GITCLONEURL} | awk -F"/" '{ print $4 }'`
 TERRAGOATFORKNAME=`echo ${GITCLONEURL} | awk -F"/" '{ print $4 "/" $5}' | awk -F"." '{ print $1 }'`
 
+echo "Creating fork of terragoat..."
+cd ${WORKSHOP_HOMEDIR}; GH_TOKEN=${GHTOKEN} gh repo fork bridgecrewio/terragoat --clone
 echo "Cloning Terragoat..." 
-cd ${WORKSHOP_HOMEDIR}; git clone ${GITCLONEURL}
 chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/terragoat
+
 
 echo "Pulling IAM EC2 Instance role credentials to ENV for terraform cloud setup... "
 CREDS=$(python3 /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py)
