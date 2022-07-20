@@ -64,7 +64,7 @@ resource "tfe_workspace" "bridgecrewWorkspace" {
   name         = "bridgecrew-workshop"
   organization = tfe_organization.workshopTFEOrg.id
   file_triggers_enabled = true
-  trigger_prefixes = "/terraform/simple_instance/"
+  trigger_prefixes = ["/terraform/simple_instance/"]
   speculative_enabled = true
   vcs_repo {
     identifier         = var.terragoat_fork_name
