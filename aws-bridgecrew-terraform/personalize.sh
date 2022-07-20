@@ -26,7 +26,13 @@ cd ${WORKSHOP_HOMEDIR}; git clone ${GITCLONEURL}
 chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/terragoat
 
 echo "Pulling IAM EC2 Instance role credentials to ENV for terraform cloud setup... "
-python3 /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py
+CREDS = $(python3 /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py)
+AWS_ACCESS_KEY_ID = $(echo ${CREDS} | awk -F" " '{ print $1 }')
+AWS_SECRET_ACCESS_KEY = $(echo ${CREDS} | awk -F" " '{ print $2 }')
+AWS_SECRET_ACCESS_KEY = $(echo ${CREDS} | awk -F" " '{ print $3 }')
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
+export AWS_SESSION_TOKEN
 
 echo "Configuring Terraform Cloud..."
 # TFC ORG's need to be globally unique, TF apply will fail if not. 

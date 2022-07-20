@@ -19,3 +19,4 @@ except:
 os.environ["AWS_ACCESS_KEY_ID"] = access_key
 os.environ["AWS_SECRET_ACCESS_KEY"] = secret_key
 os.environ["AWS_SESSION_TOKEN"] = session_token
+print(f"{access_key} {secret_key} {session_token}")
