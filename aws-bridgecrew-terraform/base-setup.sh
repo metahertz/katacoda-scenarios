@@ -34,6 +34,10 @@ echo "Installing Checkov..."
 echo "Installing Yor..." 
 sudo docker pull bridgecrew/yor
 
+echo "Installing GitHub cli..."
+wget https://github.com/cli/cli/releases/download/v2.14.2/gh_2.14.2_linux_amd64.deb
+sudo dpkg -i ./gh_2.14.2_linux_amd64.deb
+
 echo "Installing Terraform..."
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"

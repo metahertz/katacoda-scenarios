@@ -21,10 +21,21 @@ echo $4 >> ${WORKSHOP_HOMEDIR}/.bcworkshop/ghtoken
 GHUSERNAME=`echo ${GITCLONEURL} | awk -F"/" '{ print $4 }'`
 TERRAGOATFORKNAME=`echo ${GITCLONEURL} | awk -F"/" '{ print $4 "/" $5}' | awk -F"." '{ print $1 }'`
 
-echo "Creating fork of terragoat..."
-cd ${WORKSHOP_HOMEDIR}; GH_TOKEN=${GHTOKEN} gh repo fork bridgecrewio/terragoat --clone
-echo "Cloning Terragoat..." 
+echo "Logging into GH CLI..."
+echo ${GHTOKEN} | gh auth login -h github.com -p https --with-token
+echo "Creating fork of terragoat & cloning..."
+cd ${WORKSHOP_HOMEDIR}; gh repo fork bridgecrewio/terragoat --clone
 chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/terragoat
+
+echo "Configuring git with GH token auth..."
+git config --global user.email "workshop-automation@bridgecrew.local"
+git config --global user.name "Bridgecrew Workshop Automation"
+gh auth setup-git
+gh auth status
+
+echo "Adding sentinel policy files to Terragoat fork..."
+cd ${WORKSHOP_HOMEDIR}/terragoat; tar -xzvf /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup/tfc-policy-files.tgz
+cd ${WORKSHOP_HOMEDIR}/terragoat; git add -A ; git commit -m "Terraform Cloud Bridgecrew Policy Configuration [BC Workshop]" ; git push
 
 
 echo "Pulling IAM EC2 Instance role credentials to ENV for terraform cloud setup... "
