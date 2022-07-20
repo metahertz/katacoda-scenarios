@@ -26,9 +26,6 @@ sudo chown ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/.c9/bin/sqlite3
 mkdir -p ${WORKSHOP_HOMEDIR}/.terminfo/x
 cp /lib/terminfo/x/xterm-color /home/ubuntu/.terminfo/x/xterm-color
 
-
-echo "Installing JQ..."
-sudo apt install -y jq
 #cd ${WORKSHOP_HOMEDIR}; pipenv --python 3.8
 
 echo "Installing Checkov..."
@@ -41,6 +38,9 @@ echo "Installing Terraform..."
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 sudo apt-get update && sudo apt-get install -y terraform
+
+echo "Installing JQ..."
+sudo apt install -y jq
 
 echo "Fixing up botocore dep version for checkov see https://github.com/aws/aws-cli/issues/3092..."
 sudo apt -y remove python3-botocore
