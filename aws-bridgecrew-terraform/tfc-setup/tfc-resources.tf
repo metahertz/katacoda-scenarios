@@ -68,6 +68,9 @@ resource "tfe_workspace" "bridgecrewWorkspace" {
     branch             = "master"
     ingress_submodules = false
     oauth_token_id     = tfe_oauth_client.workshopGitHubOauth.oauth_token_id
+    file_triggers_enabled = true
+    trigger_prefixes = "/terraform/simple_instance/"
+    speculative_enabled = true
   }
 }
 
