@@ -25,7 +25,6 @@ echo "Logging into GH CLI..."
 echo ${GHTOKEN} | gh auth login -h github.com -p https --with-token
 echo "Creating fork of terragoat & cloning..."
 cd ${WORKSHOP_HOMEDIR}; gh repo fork bridgecrewio/terragoat --clone
-chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/terragoat
 
 echo "Configuring git with GH token auth..."
 git config --global user.email "workshop-automation@bridgecrew.local"
@@ -37,6 +36,8 @@ echo "Adding sentinel policy files to Terragoat fork..."
 cd ${WORKSHOP_HOMEDIR}/terragoat; tar -xzvf /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/tfc-setup/tfc-policy-files.tgz
 cd ${WORKSHOP_HOMEDIR}/terragoat; git add -A ; git commit -m "Terraform Cloud Bridgecrew Policy Configuration [BC Workshop]" ; git push
 
+echo "Re-ownering the repo to workshop user ubuntu..."
+chown -R ubuntu:ubuntu ${WORKSHOP_HOMEDIR}/terragoat
 
 echo "Pulling IAM EC2 Instance role credentials to ENV for terraform cloud setup... "
 CREDS=$(python3 /kubernetes-devsecops-workshop/aws-bridgecrew-terraform/pull-iam-role-creds.py)
