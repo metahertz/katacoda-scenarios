@@ -238,6 +238,17 @@ Resources:
       - WorkshopVPCRouteTable
       - WorkshopSubnet
       - WorkshopVPCGatewayAttachment
+  ProjectCodeRepo:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: bank-app-repo
+      RepositoryDescription: This repo contains the application and infra code for the DevJam CTF from PaloAlto.
+      Code:
+        BranchName: main
+        S3: 
+          Bucket: CTFProjectCodeBucket
+          Key: MyKey
+          ObjectVersion: 1
 Outputs:
   PublicIp:
     Description: Cloud9 Host IP Address
