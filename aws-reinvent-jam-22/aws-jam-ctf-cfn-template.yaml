@@ -1,0 +1,446 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Prisma Cloud Jam for Log4J CTF
+
+Parameters:
+  VpcCIDR:
+    Type: String
+    Default: 10.192.0.0/16 
+  PublicSubnetCIDR:
+    Type: String
+    Default: 10.192.10.0/24 
+  InstanceType:
+    Description: Instance class for Cloud9 IDE
+    Type: String
+    Default: t3.medium
+  LabPoolId:
+    Type: String 
+  LabUserRoleName:
+    Type: String
+  AWSAssumedUser:
+    Type: String
+    Default: "team-console" 
+    Description: Default instance ID for JAM env.
+  KeyName:
+    Type: String
+    Description: Name for the keypair used to SSH into EC2 instances
+    # A default of "lab-key-pair" is required here to conform to AWS Jam convention. Any other default will not work.
+    Default: lab-key-pair
+
+Resources: 
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR 
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway 
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC 
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnetCIDR
+      MapPublicIpOnLaunch: true 
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC 
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway 
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet 
+
+  TFCode:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName:  TFCode
+      RepositoryDescription:  This is where the Log4JankyBank app and IAC sourcecode lives.
+      Code:
+        BranchName: main
+        S3: 
+          Bucket: !Sub aws-jam-challenge-resources-${AWS::Region}
+          Key: panw-cloud-infra-ctf/ctf-repo-contents.zip
+
+  TFBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:  TFBuild
+      Description: CodeBuild for TF pipeline
+      ServiceRole: !GetAtt CBRole.Arn
+      ConcurrentBuildLimit: 1
+      TimeoutInMinutes: 5
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:5.0 
+        PrivilegedMode: false
+      Source:
+        Location: !GetAtt TFCode.CloneUrlHttp
+        Type: CODECOMMIT
+        BuildSpec: !Sub |
+          version: 0.2
+          env:
+            variables:
+              BC_SOURCE: "codebuild"
+            parameter-store:
+              BC_API_KEY: bc-api-key
+          phases:
+            install:
+              runtime-versions:
+                python: 3.7
+              commands:
+                - pip3 install checkov
+                - echo Installing codebuild-extras...
+                - curl -fsSL https://raw.githubusercontent.com/bridgecrewio/aws-codebuild-extras/master/install >> extras.sh
+                - . ./extras.sh
+            build:
+              commands:
+                - checkov -d . --bc-api-key $BC_API_KEY --repo-id $CODEBUILD_ACCOUNT_ID/$CODEBUILD_PROJECT -s --skip-check CKV_AWS_144,CKV_AWS_145,CKV_AWS_18,CKV_AWS_8
+                - checkov -d . -o junitxml --skip-check CKV_AWS_144,CKV_AWS_145,CKV_AWS_18,CKV_AWS_8 > test_results.xml
+          reports:
+            bridgecrew-iac-security:
+              files:
+                - test_results.xml
+              discard-paths: yes
+              file-format: JunitXml
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_DOCKER_LAYER_CACHE
+          - LOCAL_SOURCE_CACHE
+
+  CBRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess 
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
+        - arn:aws:iam::aws:policy/AWSCodeCommitPowerUser
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+  
+  CBPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CBPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - s3:PutObject
+          - s3:GetObject
+          - s3:GetObjectVersion
+          - codebuild:CreateReportGroup
+          - codebuild:CreateReport
+          - codebuild:BatchPutTestCases
+          - codebuild:UpdateReport
+          - secretsmanager:GetSecretValue
+          - ssm:GetParameters
+          Effect: Allow
+          Resource: '*'
+      Roles:
+      - !Ref CBRole
+
+  TFPipelineArtifacts:
+    Type: AWS::S3::Bucket
+    Properties: 
+      AccessControl: LogDeliveryWrite
+      Tags:
+        - Key: Use
+          Value: PipelineArtifacts
+
+  TFPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: !Sub ${TFPipelineArtifacts}
+      Name: TFPipeline
+      RoleArn: !GetAtt TFPipelineRole.Arn
+      Stages: 
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: "1"
+                Provider: CodeCommit
+              OutputArtifacts: 
+                - Name: SourceArtifact
+              Configuration:
+                BranchName: main
+                OutputArtifactFormat: CODE_ZIP
+                PollForSourceChanges: 'true'
+                RepositoryName: TFCode
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: TFBuild
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildVariables
+              RunOrder: 1
+    DependsOn: TFPipelinePolicies
+
+  TFPipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - codepipeline.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+        
+  TFPipelinePolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: TFPipelinePolicies
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - codecommit:CancelUploadArchive
+          - codecommit:GetBranch
+          - codecommit:GetCommit
+          - codecommit:GetRepository
+          - codecommit:GetUploadArchiveStatus
+          - codecommit:UploadArchive
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - codedeploy:CreateDeployment
+          - codedeploy:GetApplication
+          - codedeploy:GetApplicationRevision
+          - codedeploy:GetDeployment
+          - codedeploy:GetDeploymentConfig
+          - codedeploy:RegisterApplicationRevision
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - codestar-connections:UseConnection
+          Effect: Allow
+          Resource: '*'
+#        - Action:
+#          - s3:*
+#          Effect: Allow
+#          Resource: '*'
+        - Action:
+          - lambda:InvokeFunction
+          - lambda:ListFunctions
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - sms:GetParameters
+          - ssm:GetParameter
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - codebuild:BatchGetBuilds
+          - codebuild:StartBuild
+          - codebuild:BatchGetBuildBatches
+          - codebuild:StartBuildBatch
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - servicecatalog:ListProvisioningArtifacts
+          - servicecatalog:CreateProvisioningArtifact
+          - servicecatalog:DescribeProvisioningArtifact
+          - servicecatalog:DeleteProvisioningArtifact
+          - servicecatalog:UpdateProduct
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - states:DescribeExecution
+          - states:DescribeStateMachine
+          - states:StartExecution
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - s3:GetObject
+          - s3:PutObject
+          Effect: Allow
+          Resource: !Sub ${TFPipelineArtifacts.Arn}/*
+      Roles:
+      - !Ref TFPipelineRole
+  WorkshopEC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cloud9-ec2-instance-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: allow-cloud9-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "cloud9:CreateEnvironmentSSH"
+                  - "cloud9:CreateEnvironmentToken"
+                  - "cloud9:DescribeEnvironments"
+                  - "cloud9:DescribeSSHRemote"
+                  - "cloud9:GetUserPublicKey"
+                  - "cloud9:ListEnvironments"
+                  - "cloud9:ValidateEnvironmentName"
+                  - "cloud9:CreateEnvironmentMembership"
+                Resource: '*'
+        - PolicyName: allow-edit-sg
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "ec2:DescribeSecurityGroupReferences"
+                  - "ec2:DescribeSecurityGroupRules"
+                  - "ec2:DescribeSecurityGroups"
+                  - "ec2:ModifySecurityGroupRules"
+                Resource: "*"
+      Path: /
+  # WorkshopBaseDebugKeyPair:    
+  #   Type: AWS::EC2::KeyPair
+  #   Properties: 
+  #     KeyName: workshop-base-keypair
+  #     KeyType: rsa
+  #     PublicKeyMaterial: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCjJzEo6HDD+dvvDId++VIynPBNspYSebF9aoYTUzoX0ge0w9MkLDCis4/SAQlGViNBOamPvIlP/ATGIDRQRS/S+l+YdILb0Q5vIKeE7tyKlMjROOpJWm9f+nj5uSR7WyoFLLy8QHcrG3xc1YPRvk0UQsNH0eDrJWt47vzu2mXLX4vpffTy+8WBr/fSOo532OQCloApziQ/SPFLE9j191z4i4HN98sO80/be15HfnN8p4WxSCUQ2iZfo0oMTOjI+CH//yTdC+eBa39bLO12XADxpcKeNWCj3j8FfuiuTzMT5TEO3K7sJIXpi2rKywMC0FWvMWB7Jo+aCVti+HX2WlThptDzeTJCcOWdzie5/zLU60sCdx5Ksn1w5lpjGOoS5vkeRKJk1GBJFzAvdXhC9DdEWy4J3PTnprpdcIRVJ3ZEdbbEZli5Yex4Mwt2tR1PgnxwnSP5wnyeNNbO7yWzH9Y1uXzY5x6cojZKfTypQ8ocYh0oTtEvyTmZnRGM1j8rGTE= matt@M-C02D83M3MD6R
+  CtfEc2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: workshop-ec2-instance-profile
+      Path: /
+      Roles: 
+       - !Ref WorkshopEC2InstanceRole
+  ctfEC2SG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: SSH debug/proctor access for devjam host.
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          IpProtocol: tcp
+          ToPort: 65535
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          IpProtocol: udp
+          ToPort: 65535
+      Tags:
+        - Key: usage
+          Value: PaloAlto DevJam CTF 
+        - Key: createdby
+          Value: Cloudformation
+        - Key: type
+          Value: ctf-reinvent-22
+        - Key: moreinfo
+          Value: workshop.bridgecrew.io
+  CtfEC2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      KeyName: !Ref KeyName
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash -xe
+            git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
+            AWS_ACCOUNT_ID=${account_id}
+            sudo python3 ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${LabUserRoleName} ${AWSAssumedUser}
+            sudo chmod +x ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/*.sh
+            sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/base-setup.sh
+            sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/personalize.sh
+          - account_id: !Ref "AWS::AccountId"
+      InstanceType: !Ref InstanceType
+      ImageId: ami-0c943b80df4b831ee
+      IamInstanceProfile: !Ref CtfEc2InstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: '100'
+            DeleteOnTermination: 'true'
+            Encrypted: 'false'
+      NetworkInterfaces:
+        - DeviceIndex: '0'
+          AssociatePublicIpAddress: 'true'
+          GroupSet:
+            - !Ref ctfEC2SG
+          SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: usage
+          Value: PaloAlto DevJam CTF 
+        - Key: createdby
+          Value: Cloudformation
+        - Key: type
+          Value: ctf-reinvent-22
+        - Key: moreinfo
+          Value: workshop.bridgecrew.io
+        - Key: kind
+          Value: yes
+  # DevIDE:
+  #   Type: AWS::Cloud9::EnvironmentEC2
+  #   Properties:
+  #     Name: DevIDE
+  #     Description: Cloud9 IDE
+  #     SubnetId: !Ref PublicSubnet
+  #     InstanceType: !Ref InstanceType
+  #     OwnerArn: !Sub 'arn:aws:sts::${AWS::AccountId}:assumed-role/${LabUserRoleName}/team-console'
+  #     Repositories: 
+  #     - PathComponent: "/tfFiles/"
+  #       RepositoryUrl: !GetAtt TFCode.CloneUrlHttp
+
+Outputs:
+  #Cloud9URL:
+  #  Description: Cloud9 Environment
+  #  Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${DevIDE}'
+  PublicIp:
+    Description: Cloud9 Host IP Address
+    Value: !GetAtt CtfEC2.PublicIp
+  KeyName:
+    Description: The SSH KeyPair Name
+    Value: !Ref KeyName

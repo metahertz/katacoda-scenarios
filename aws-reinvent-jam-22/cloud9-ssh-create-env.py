@@ -10,12 +10,12 @@ from requests_aws4auth import AWS4Auth
 from time import sleep
 
 # Cloud9 Environment Details
-cloud9InstanceName = "bridgecrew-workshop"
+cloud9InstanceName = "JankyBank-CTF"
 cloud9SshPort = "22"
 cloud9SshLoginName = "ubuntu"
 
 # EC2 Credentials role name
-ec2MetaIamRoleName = 'demo-ec2-instance-role'
+ec2MetaIamRoleName = 'cloud9-ec2-instance-role'
 
 # Read in the AWS Account ID and user details so we can add the end user to the Cloud9 env
 awsOrgID = sys.argv[1]
@@ -44,7 +44,7 @@ try:
     publicIpv4Response = requests.get("http://169.254.169.254/latest/meta-data/public-ipv4")
     cloud9SshHost = publicIpv4Response.text
     #Append IP to workshop name for uniqueness (proctor account will see all C9 Env's)
-    cloud9InstanceName = f"bridgecrew-workshop-{cloud9SshHost}"
+    cloud9InstanceName = f"{cloud9InstanceName}-{cloud9SshHost}"
 
 except:
    print('No public IP available from metadata. Exiting')

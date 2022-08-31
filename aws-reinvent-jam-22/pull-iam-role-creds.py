@@ -2,7 +2,7 @@ import sys, os, datetime, json
 import requests 
 
 # EC2 Credentials role name
-ec2MetaIamRoleName = 'demo-ec2-instance-role'
+ec2MetaIamRoleName = 'cloud9-ec2-instance-role'
 
 # Read EC2 IAM profile for creds. Fallback to ENV
 try:
