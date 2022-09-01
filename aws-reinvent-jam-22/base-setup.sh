@@ -50,4 +50,8 @@ echo "Fixing up botocore dep version for checkov see https://github.com/aws/aws-
 sudo apt -y remove python3-botocore
 pip3 install botocore
 
+echo "Fixup AWSCLI install.."
+sudo apt install -y awscli
+sudo pip3 install --upgrade awscli
+
 echo "done"
