@@ -110,7 +110,7 @@ Resources:
       RouteTableId: !Ref RouteTable
       SubnetId: !Ref PrivateSubnetB
   
-  TFCode:
+  JankyBank:
     Type: AWS::CodeCommit::Repository
     Properties:
       RepositoryName:  JankyBank
@@ -137,7 +137,7 @@ Resources:
         Image: aws/codebuild/standard:5.0 
         PrivilegedMode: false
       Source:
-        Location: !GetAtt TFCode.CloneUrlHttp
+        Location: !GetAtt JankyBank.CloneUrlHttp
         Type: CODECOMMIT
         BuildSpec: !Sub |
           version: 0.2
@@ -199,7 +199,7 @@ Resources:
         Image: aws/codebuild/standard:5.0 
         PrivilegedMode: false
       Source:
-        Location: !GetAtt TFCode.CloneUrlHttp
+        Location: !GetAtt JankyBank.CloneUrlHttp
         Type: CODECOMMIT
         BuildSpec: !Sub |
           version: 0.2
@@ -217,7 +217,7 @@ Resources:
                 - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                 - mkdir -p ~/.kube
                 - cat $KUBECONFIG > ~/.kube/config
-                - sed -i 's/127.0.0.1/$EC2_PRIVATE_IP/g' ~/.kube/config
+                - sed -i 's/0.0.0.0/$EC2_PRIVATE_IP/g' ~/.kube/config
             build:
               commands:
                 - kubectl apply -f ./jankybank-main/simpledeploy.yaml
@@ -294,7 +294,7 @@ Resources:
                 BranchName: main
                 OutputArtifactFormat: CODE_ZIP
                 PollForSourceChanges: 'true'
-                RepositoryName: TFCode
+                RepositoryName: JankyBank
               RunOrder: 1
         - Name: Build
           Actions:
@@ -464,6 +464,14 @@ Resources:
               - Effect: Allow
                 Action: 
                   - "eks:*"
+                Resource: '*'
+        - PolicyName: put-parameter
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "ssm:PutParameter"
                 Resource: '*'
       Path: /
   CtfEc2InstanceProfile:
