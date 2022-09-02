@@ -173,6 +173,10 @@ Resources:
 
   JankyDeploy:
     Type: AWS::CodeBuild::Project
+    DependsOn: 
+      - ctfEC2SG
+      - CBPolicies
+      - CBRole
     Properties:
       Name:  JankyBank-Deploy
       Description: CodeBuild Deployment of JankyBank
@@ -202,7 +206,7 @@ Resources:
           env:
             variables:
               BC_SOURCE: "codebuild"
-              EC2_PRIVATE_IP: ${CtfEC2.PrivateIp}
+              EC2_PRIVATE_IP: !Ref CtfEC2.PrivateIp
             parameter-store:
               KUBECONFIG: KUBECONFIG
           phases:
@@ -212,8 +216,8 @@ Resources:
               commands:
                 - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                 - mkdir -p ~/.kube
-                - cat $(KUBECONFIG) > ~/.kube/config
-                - sed -i 's/127.0.0.1/${EC2_PRIVATE_IP}/g' ~/.kube/config
+                - cat $KUBECONFIG > ~/.kube/config
+                - sed -i 's/127.0.0.1/$EC2_PRIVATE_IP/g' ~/.kube/config
             build:
               commands:
                 - kubectl apply -f ./jankybank-main/simpledeploy.yaml
@@ -253,6 +257,7 @@ Resources:
           - codebuild:UpdateReport
           - secretsmanager:GetSecretValue
           - ssm:GetParameters
+          - ec2:*
           Effect: Allow
           Resource: '*'
       Roles:
@@ -319,7 +324,7 @@ Resources:
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts:
-                - Name: BuildVariables
+                - Name: DeployVariables
               RunOrder: 1
     DependsOn: TFPipelinePolicies
 
@@ -399,6 +404,10 @@ Resources:
           - states:DescribeExecution
           - states:DescribeStateMachine
           - states:StartExecution
+          Effect: Allow
+          Resource: '*'
+        - Action:
+          - ec2:*
           Effect: Allow
           Resource: '*'
         - Action:
