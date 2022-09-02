@@ -179,13 +179,14 @@ Resources:
       ServiceRole: !GetAtt CBRole.Arn
       ConcurrentBuildLimit: 1
       TimeoutInMinutes: 5
-      SecurityGroupIds: 
-        - !Ref ctfEC2SG
-      Subnets: 
-        - !Ref PrivateSubnetA
-        - !Ref PrivateSubnetB
-        - !Ref PublicSubnet
-      VpcId: !Ref VPC
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref ctfEC2SG
+        Subnets: 
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+          - !Ref PublicSubnet
+        VpcId: !Ref VPC
       Artifacts:
         Type: NO_ARTIFACTS
       Environment:
