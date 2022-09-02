@@ -128,7 +128,7 @@ Resources:
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       CidrBlock: !Ref PrivateSubnetBCIDR
       MapPublicIpOnLaunch: false 
-      
+
   PrivateSubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -230,7 +230,7 @@ Resources:
           env:
             variables:
               BC_SOURCE: "codebuild"
-              EC2_PRIVATE_IP: !Ref CtfEC2.PrivateIp
+              EC2_PRIVATE_IP: ${CtfEC2.PrivateIp}
             parameter-store:
               KUBECONFIG: KUBECONFIG
           phases:
@@ -515,6 +515,23 @@ Resources:
           FromPort: 22
           IpProtocol: tcp
           ToPort: 22
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 32080
+          IpProtocol: tcp
+          ToPort: 32080
+      SecurityGroupIngress:
+        - SourceSecurityGroupId:
+            Fn::GetAtt:
+              - ctfEC2SG
+              - GroupId
+          GroupId:
+            Fn::GetAtt:
+              - ctfEC2SG
+              - GroupId
+          IpProtocol: tcp
+          FromPort: 6443
+          ToPort: 6443
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           FromPort: 0
