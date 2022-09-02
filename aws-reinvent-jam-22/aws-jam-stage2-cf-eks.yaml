@@ -1,0 +1,385 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Prisma Cloud Jam for Log4J CTF
+
+Parameters:
+
+  BootstrapArguments:
+    Type: String
+    Default: ""
+    Description: "Arguments to pass to the bootstrap script. See files/bootstrap.sh in https://github.com/awslabs/amazon-eks-ami"
+
+  NodeAutoScalingGroupDesiredCapacity:
+    Type: Number
+    Default: 3
+    Description: Desired capacity of Node Group ASG.
+  
+  ClusterName:
+    Type: String
+    Description: The cluster name provided when the cluster was created. If it is incorrect, nodes will not be able to join the cluster.
+    Default: "KubernetesCTF"
+
+  NodeAutoScalingGroupMaxSize:
+    Type: Number
+    Default: 4
+    Description: Maximum size of Node Group ASG. Set to at least 1 greater than NodeAutoScalingGroupDesiredCapacity.
+
+  NodeAutoScalingGroupMinSize:
+    Type: Number
+    Default: 1
+    Description: Minimum size of Node Group ASG.
+
+  NodeGroupName:
+    Type: String
+    Description: Unique identifier for the Node Group.
+    Default: "EKS CTF Node Group 1"
+
+  NodeImageId:
+    Type: String
+    Default: ""
+    Description: (Optional) Specify your own custom image ID. This value overrides any AWS Systems Manager Parameter Store value specified above.
+
+  NodeImageIdSSMParam:
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Default: /aws/service/eks/optimized-ami/1.17/amazon-linux-2/recommended/image_id
+    Description: AWS Systems Manager Parameter Store parameter of the AMI ID for the worker node instances. Change this value to match the version of Kubernetes you are using.
+
+  DisableIMDSv1:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "false"
+      - "true"
+
+  NodeInstanceType:
+    Type: String
+    Default: t3.medium
+    AllowedValues:
+      - t3.medium
+    ConstraintDescription: Must be a valid EC2 instance type
+    Description: EC2 instance type for the node instances
+
+  NodeVolumeSize:
+    Type: Number
+    Default: 20
+    Description: Node volume size
+
+Mappings:
+  PartitionMap:
+    aws:
+      EC2ServicePrincipal: "ec2.amazonaws.com"
+    aws-us-gov:
+      EC2ServicePrincipal: "ec2.amazonaws.com"
+    aws-cn:
+      EC2ServicePrincipal: "ec2.amazonaws.com.cn"
+    aws-iso:
+      EC2ServicePrincipal: "ec2.c2s.ic.gov"
+    aws-iso-b:
+      EC2ServicePrincipal: "ec2.sc2s.sgov.gov"
+
+Conditions:
+  HasNodeImageId: !Not
+    - "Fn::Equals":
+      - !Ref NodeImageId
+      - ""
+
+  IMDSv1Disabled:
+    "Fn::Equals":
+      - !Ref DisableIMDSv1
+      - "true"
+
+
+Resources: 
+  
+  # Handled for us by JAM. Uncomment to test CF in regular AWS env's.
+  # LabKeyPair:
+  #   Type: AWS::EC2::KeyPair
+  #   Properties: 
+  #     KeyName: lab-key-pair
+  #     PublicKeyMaterial: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCjJzEo6HDD+dvvDId++VIynPBNspYSebF9aoYTUzoX0ge0w9MkLDCis4/SAQlGViNBOamPvIlP/ATGIDRQRS/S+l+YdILb0Q5vIKeE7tyKlMjROOpJWm9f+nj5uSR7WyoFLLy8QHcrG3xc1YPRvk0UQsNH0eDrJWt47vzu2mXLX4vpffTy+8WBr/fSOo532OQCloApziQ/SPFLE9j191z4i4HN98sO80/be15HfnN8p4WxSCUQ2iZfo0oMTOjI+CH//yTdC+eBa39bLO12XADxpcKeNWCj3j8FfuiuTzMT5TEO3K7sJIXpi2rKywMC0FWvMWB7Jo+aCVti+HX2WlThptDzeTJCcOWdzie5/zLU60sCdx5Ksn1w5lpjGOoS5vkeRKJk1GBJFzAvdXhC9DdEWy4J3PTnprpdcIRVJ3ZEdbbEZli5Yex4Mwt2tR1PgnxwnSP5wnyeNNbO7yWzH9Y1uXzY5x6cojZKfTypQ8ocYh0oTtEvyTmZnRGM1j8rGTE= matt@M-C02D83M3MD6R"
+
+
+
+
+
+  TFCode:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName:  TFCode
+      RepositoryDescription:  This is where the Log4JankyBank app and IAC sourcecode lives.
+      Code:
+        BranchName: main
+        S3: 
+          Bucket: !Sub aws-jam-challenge-resources-${AWS::Region}
+          Key: panw-cloud-infra-ctf/ctf-repo-contents.zip
+
+
+
+  NodeInstanceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap [PartitionMap, !Ref "AWS::Partition", EC2ServicePrincipal]
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      Path: /
+
+  NodeInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: /
+      Roles:
+        - !Ref NodeInstanceRole
+
+  NodeSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: Security group for all nodes in the cluster
+      Tags:
+        - Key: !Sub kubernetes.io/cluster/${ClusterName}
+          Value: owned
+      VpcId: !Ref VPC
+
+  NodeSecurityGroupIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow node to communicate with each other
+      FromPort: 0
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: "-1"
+      SourceSecurityGroupId: !Ref NodeSecurityGroup
+      ToPort: 65535
+
+  ClusterControlPlaneSecurityGroupIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow pods to communicate with the cluster API Server
+      FromPort: 443
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref NodeSecurityGroup
+      ToPort: 443
+
+  EKStoEC2Cloud9Ingress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow our Cloud9 environment to get all up in EKS
+      FromPort: 0
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: "-1"
+      SourceSecurityGroupId: !Ref ctfEC2SG
+      ToPort: 65535
+
+    EKStoEC2Cloud9Egress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow our Cloud9 environment to get all up in EKS
+      FromPort: 0
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: "-1"
+      DestinationSecurityGroupId: !Ref ctfEC2SG
+      ToPort: 65535
+
+  ControlPlaneEgressToNodeSecurityGroup:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow the cluster control plane to communicate with worker Kubelet and pods
+      DestinationSecurityGroupId: !Ref NodeSecurityGroup
+      FromPort: 1025
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      ToPort: 65535
+
+  ControlPlaneEgressToNodeSecurityGroupOn443:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow the cluster control plane to communicate with pods running extension API servers on port 443
+      DestinationSecurityGroupId: !Ref NodeSecurityGroup
+      FromPort: 443
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      ToPort: 443
+
+  NodeSecurityGroupFromControlPlaneIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow worker Kubelets and pods to receive communication from the cluster control plane
+      FromPort: 1025
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref NodeSecurityGroup
+      ToPort: 65535
+
+  NodeSecurityGroupFromControlPlaneOn443Ingress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: 
+      - NodeSecurityGroup
+      - EKSCluster
+    Properties:
+      Description: Allow pods running extension API servers on port 443 to receive communication from cluster control plane
+      FromPort: 443
+      GroupId: !Ref NodeSecurityGroup
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref NodeSecurityGroup
+      ToPort: 443
+
+  NodeLaunchTemplate:
+    Type: "AWS::EC2::LaunchTemplate"
+    Properties:
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: !Ref NodeVolumeSize
+              VolumeType: gp2
+        IamInstanceProfile:
+          Arn: !GetAtt NodeInstanceProfile.Arn
+        ImageId: !If
+          - HasNodeImageId
+          - !Ref NodeImageId
+          - !Ref NodeImageIdSSMParam
+        InstanceType: !Ref NodeInstanceType
+        KeyName: !Ref KeyName
+        SecurityGroupIds:
+        - !Ref NodeSecurityGroup
+        UserData: !Base64
+          "Fn::Sub": |
+            #!/bin/bash
+            set -o xtrace
+            /etc/eks/bootstrap.sh ${ClusterName} ${BootstrapArguments}
+            /opt/aws/bin/cfn-signal --exit-code $? \
+                     --stack  ${AWS::StackName} \
+                     --resource NodeGroup  \
+                     --region ${AWS::Region}
+        MetadataOptions:
+          HttpPutResponseHopLimit : 2
+          HttpEndpoint: enabled
+          HttpTokens: !If
+            - IMDSv1Disabled
+            - required
+            - optional
+
+  NodeGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    DependsOn: EKSCluster
+    Properties:
+      DesiredCapacity: !Ref NodeAutoScalingGroupDesiredCapacity
+      LaunchTemplate:
+        LaunchTemplateId: !Ref NodeLaunchTemplate
+        Version: !GetAtt NodeLaunchTemplate.LatestVersionNumber
+      MaxSize: !Ref NodeAutoScalingGroupMaxSize
+      MinSize: !Ref NodeAutoScalingGroupMinSize
+      Tags:
+        - Key: Name
+          PropagateAtLaunch: true
+          Value: !Sub ${ClusterName}-${NodeGroupName}-Node
+        - Key: !Sub kubernetes.io/cluster/${ClusterName}
+          PropagateAtLaunch: true
+          Value: owned
+      VPCZoneIdentifier: 
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: 1
+        MinInstancesInService: !Ref NodeAutoScalingGroupDesiredCapacity
+        PauseTime: PT5M
+
+
+  EKSControlPlaneAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: eks-controlplane-access-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt WorkshopEC2InstanceRole.Arn
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+
+  EKSCluster:
+    Type: AWSQS::EKS::Cluster
+    Properties:
+      Name: !Ref ClusterName
+      Version: "1.20"
+      RoleArn: !GetAtt EKSControlPlaneAccessRole.Arn
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref NodeSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+        EndpointPublicAccess: false
+        EndpointPrivateAccess: true
+        PublicAccessCidrs: []
+      Logging:
+        ClusterLogging:
+          EnabledTypes:
+            - Type: api
+            - Type: audit
+            - Type: authenticator
+      KubernetesApiAccess:
+        Roles:
+          - Arn: !Ref EKSControlPlaneAccessRole
+            Username: !Ref EKSControlPlaneAccessRole
+            Groups: [ 'system:masters' ]
+
+Outputs:
+  #Cloud9URL:
+  #  Description: Cloud9 Environment
+  #  Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${DevIDE}' 
+  KeyName:
+    Description: The SSH KeyPair Name
+    Value: !Ref KeyName
+  NodeInstanceRole:
+    Description: The node instance role
+    Value: !GetAtt NodeInstanceRole.Arn
+  NodeSecurityGroup:
+    Description: The security group for the node group
+    Value: !Ref NodeSecurityGroup
+  NodeAutoScalingGroup:
+    Description: The autoscaling group
+    Value: !Ref NodeGroup

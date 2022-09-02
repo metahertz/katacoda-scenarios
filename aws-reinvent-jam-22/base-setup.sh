@@ -28,6 +28,69 @@ cp /lib/terminfo/x/xterm-color /home/ubuntu/.terminfo/x/xterm-color
 
 #cd ${WORKSHOP_HOMEDIR}; pipenv --python 3.8
 
+echo "Configuring KIND cluster environment..." 
+cat > ${WORKSHOP_AUTOMATION_DIR}/kind-config.yaml << EOF
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 32080
+    hostPort: 32080
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 32443
+    hostPort: 32443
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+- role: worker
+- role: worker
+EOF
+
+echo "Setting up KIND cluster..."
+cd ${WORKSHOP_AUTOMATION_DIR}; sudo /usr/bin/kind create cluster --name bridgecrew-workshop --config=kind-config.yaml
+
+#echo "Installing kubectl cli..."
+#curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+#chmod +x ./kubectl
+#sudo mv ./kubectl /usr/bin/kubectl
+
+echo "Providing ${WORKSHOP_USER} access to KIND cluster..."
+cd ${WORKSHOP_HOMEDIR}; sudo cp -rfv /root/.kube /home/${WORKSHOP_USER}/.kube
+cd ${WORKSHOP_HOMEDIR}; sudo chown -R ${WORKSHOP_USER} /home/${WORKSHOP_USER}/.kube
+
+echo "Installing ArgoCD into cluster..."
+cd ${WORKSHOP_HOMEDIR}; kubectl create namespace argocd
+cd ${WORKSHOP_HOMEDIR}; kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+echo "Setting access to Argo Web UI" 
+kubectl patch svc argocd-server -n argocd --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"},{"op":"replace","path":"/spec/ports/0/nodePort","value":32080},{"op":"replace","path":"/spec/ports/1/nodePort","value":32443}]'
+
+echo "Installing ArgoCD CLI..."
+#cd ${WORKSHOP_HOMEDIR}; sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+#cd ${WORKSHOP_HOMEDIR}; sudo chmod +x /usr/local/bin/argocd
+
+echo "Installing MetalLB for Docker Bridge L2 Subnet..."
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+sleep 1
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+cat > ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml << EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 172.18.255.10-172.18.255.250
+EOF
+kubectl apply -f ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml
+
+
 echo "Installing Checkov..."
 #sudo docker pull bridgecrew/checkov
 
