@@ -49,8 +49,8 @@ nodes:
     hostPort: 32443
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38081
-    hostPort: 38081
+  - containerPort: 38080
+    hostPort: 38080
     listenAddress: "0.0.0.0"
     protocol: tcp
   - containerPort: 38081
