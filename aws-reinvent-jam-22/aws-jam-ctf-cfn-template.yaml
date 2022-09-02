@@ -517,20 +517,13 @@ Resources:
           ToPort: 22
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
-          FromPort: 32080
+          FromPort: 38080
           IpProtocol: tcp
-          ToPort: 32080
+          ToPort: 38080
       SecurityGroupIngress:
-        - SourceSecurityGroupId:
-            Fn::GetAtt:
-              - ctfEC2SG
-              - GroupId
-          GroupId:
-            Fn::GetAtt:
-              - ctfEC2SG
-              - GroupId
-          IpProtocol: tcp
+        - CidrIp: 10.192.0.0/16
           FromPort: 6443
+          IpProtocol: tcp
           ToPort: 6443
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
