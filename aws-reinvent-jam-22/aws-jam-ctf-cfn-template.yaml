@@ -596,9 +596,9 @@ Outputs:
   Cloud9URL:
     Description: Cloud9 Environment Access
     Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloud9/home/account'
-  PublicIp:
-    Description: Host IP Address
-    Value: !GetAtt CtfEC2.PublicIp
+  HackerIp:
+    Description: CTF (Hacker) IP
+    Value: !GetAtt CtfEC2.PrivateIp
   ingressURI:
-    Description: Kubernetes Ingress URI
-    Value:  !Join [ "", [ "https://", !GetAtt CtfEC2.PublicIp, ":32443" ] ]
+    Description: JankyBank URL
+    Value:  !Join [ "", [ "http://", !GetAtt CtfEC2.PublicIp, ":38080" ] ]

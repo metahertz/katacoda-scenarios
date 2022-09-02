@@ -131,6 +131,7 @@ kubectl apply -f ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml
 echo "Cloning CTF attack tools..."
 git clone https://github.com/eurogig/log4sheller.git
 chown -R ubuntu ./log4sheller
+cd ./log4sheller ; sudo bash init.sh    
 
 echo "Installing Checkov..."
 #sudo docker pull bridgecrew/checkov
