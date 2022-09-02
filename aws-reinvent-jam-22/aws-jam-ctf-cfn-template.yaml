@@ -113,7 +113,7 @@ Resources:
   TFCode:
     Type: AWS::CodeCommit::Repository
     Properties:
-      RepositoryName:  TFCode
+      RepositoryName:  JankyBank
       RepositoryDescription:  This is where the Log4JankyBank app and IAC sourcecode lives.
       Code:
         BranchName: main
@@ -124,8 +124,8 @@ Resources:
   TFBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name:  TFBuild
-      Description: CodeBuild for TF pipeline
+      Name:  JankyBank-Build
+      Description: CodeBuild Deployment of JankyBank
       ServiceRole: !GetAtt CBRole.Arn
       ConcurrentBuildLimit: 1
       TimeoutInMinutes: 5
@@ -158,7 +158,7 @@ Resources:
             build:
               commands:
                 - checkov -d . --bc-api-key $BC_API_KEY --repo-id $CODEBUILD_ACCOUNT_ID/$CODEBUILD_PROJECT -s --framework sca_package kubernetes -c 'CKV_K8S_16,CKV_CVE*'
-                - checkov -d . -o junitxml --framework sca_package kubernetes -c 'CKV_K8S_16,CKV_CVE*' > test_results.xml
+                - checkov -d . -s -o junitxml --framework sca_package kubernetes -c 'CKV_K8S_16,CKV_CVE*' > test_results.xml
           reports:
             bridgecrew-iac-security:
               files:
@@ -225,7 +225,7 @@ Resources:
       ArtifactStore:
         Type: S3
         Location: !Sub ${TFPipelineArtifacts}
-      Name: TFPipeline
+      Name: Janky-CI-Pipeline
       RoleArn: !GetAtt TFPipelineRole.Arn
       Stages: 
         - Name: Source
@@ -253,7 +253,7 @@ Resources:
                 Provider: CodeBuild
                 Version: "1"
               Configuration:
-                ProjectName: TFBuild
+                ProjectName: JankyBank-Build
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts:
@@ -475,7 +475,7 @@ Outputs:
     Value: !Ref KeyName
   Cloud9URL:
     Description: Cloud9 Environment Access
-    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/'
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloud9/home/account'
   PublicIp:
     Description: Host IP Address
     Value: !GetAtt CtfEC2.PublicIp
