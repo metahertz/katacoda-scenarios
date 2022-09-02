@@ -68,6 +68,7 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC 
+  
   DefaultRoute:
     Type: AWS::EC2::Route
     DependsOn: InternetGatewayAttachment
@@ -75,14 +76,36 @@ Resources:
       RouteTableId: !Ref RouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway 
+
   PublicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref RouteTable
       SubnetId: !Ref PublicSubnet 
+  
+  NATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+        Domain: vpc
 
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+        AllocationId: !GetAtt NATGatewayEIP.AllocationId
+        SubnetId: !Ref PublicSubnet
 
-
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC 
+  
+  PrivateDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: NATGateway
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
 
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
@@ -91,10 +114,11 @@ Resources:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       CidrBlock: !Ref PrivateSubnetACIDR
       MapPublicIpOnLaunch: false 
+
   PrivateSubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref RouteTable
+      RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnetA 
 
   PrivateSubnetB:
@@ -104,10 +128,11 @@ Resources:
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       CidrBlock: !Ref PrivateSubnetBCIDR
       MapPublicIpOnLaunch: false 
+      
   PrivateSubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref RouteTable
+      RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnetB
   
   JankyBank:
@@ -121,7 +146,7 @@ Resources:
           Bucket: !Sub aws-jam-challenge-resources-${AWS::Region}
           Key: panw-cloud-infra-ctf/ctf-repo-contents.zip
 
-  TFBuild:
+  JankyBuild:
     Type: AWS::CodeBuild::Project
     Properties:
       Name:  JankyBank-Build
@@ -189,7 +214,6 @@ Resources:
         Subnets: 
           - !Ref PrivateSubnetA
           - !Ref PrivateSubnetB
-          - !Ref PublicSubnet
         VpcId: !Ref VPC
       Artifacts:
         Type: NO_ARTIFACTS
