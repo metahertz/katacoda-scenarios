@@ -153,7 +153,7 @@ sudo aws ssm put-parameter \
     --name KUBECONFIG \
     --type SecureString \
     --key-id alias/aws/ssm \
-    --value file:///root/.kube/config \
+    --value "$(sudo cat /root/.kube/config | base64)" \
     --tier Advanced
 
 echo "done"
