@@ -171,6 +171,52 @@ Resources:
           - LOCAL_DOCKER_LAYER_CACHE
           - LOCAL_SOURCE_CACHE
 
+  JankyDeploy:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:  JankyBank-Deploy
+      Description: CodeBuild Deployment of JankyBank
+      ServiceRole: !GetAtt CBRole.Arn
+      ConcurrentBuildLimit: 1
+      TimeoutInMinutes: 5
+      SecurityGroupIds: 
+        - !Ref ctfEC2SG
+      Subnets: 
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+        - !Ref PublicSubnet
+      VpcId: !Ref VPC
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:5.0 
+        PrivilegedMode: false
+      Source:
+        Location: !GetAtt TFCode.CloneUrlHttp
+        Type: CODECOMMIT
+        BuildSpec: !Sub |
+          version: 0.2
+          env:
+            variables:
+              BC_SOURCE: "codebuild"
+              EC2_PRIVATE_IP: ${CtfEC2.PrivateIp}
+            parameter-store:
+              KUBECONFIG: KUBECONFIG
+          phases:
+            install:
+              runtime-versions:
+                python: 3.7
+              commands:
+                - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                - mkdir -p ~/.kube
+                - cat $(KUBECONFIG) > ~/.kube/config
+                - sed -i 's/127.0.0.1/${EC2_PRIVATE_IP}/g' ~/.kube/config
+            build:
+              commands:
+                - kubectl apply -f ./jankybank-main/simpledeploy.yaml
+
   CBRole:
     Type: AWS::IAM::Role
     Properties:
@@ -254,6 +300,21 @@ Resources:
                 Version: "1"
               Configuration:
                 ProjectName: JankyBank-Build
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildVariables
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: JankyBank-Deploy
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts:
