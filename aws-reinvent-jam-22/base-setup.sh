@@ -32,15 +32,49 @@ echo "Configuring KIND cluster environment..."
 cat > ${WORKSHOP_AUTOMATION_DIR}/kind-config.yaml << EOF
 apiVersion: kind.x-k8s.io/v1alpha4
 kind: Cluster
+networking:
+  apiServerAddress: "0.0.0.0"
+  # By default the API server listens on a random open port.
+  # You may choose a specific port but probably don't need to in most cases.
+  # Using a random port makes it easier to spin up multiple clusters.
+  apiServerPort: 6443
 nodes:
 - role: control-plane
   extraPortMappings:
+  - containerPort: 6443
+    hostPort: 6443
+    listenAddress: "0.0.0.0"
+    protocol: tcp
   - containerPort: 32080
     hostPort: 32080
     listenAddress: "0.0.0.0"
     protocol: tcp
   - containerPort: 32443
     hostPort: 32443
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 8080
+    hostPort: 8080
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 8081
+    hostPort: 8081
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 8082
+    hostPort: 8082
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 8083
+    hostPort: 8083
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 8084
+    hostPort: 8084
+    listenAddress: "0.0.0.0"
+    protocol: tcp
+  - containerPort: 8085
+    hostPort: 8085
     listenAddress: "0.0.0.0"
     protocol: tcp
 - role: worker
@@ -116,5 +150,13 @@ pip3 install botocore
 echo "Fixup AWSCLI install.."
 sudo apt install -y awscli
 sudo pip3 install --upgrade awscli
+
+echo "Pushing Kubeconfig to SSM for CI.."
+sudo aws ssm put-parameter \
+    --region $(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region) \
+    --name KUBECONFIG \
+    --type SecureString \
+    --key-id alias/aws/ssm \
+    --value file:///root/.kube/config
 
 echo "done"
