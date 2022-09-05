@@ -100,7 +100,7 @@ echo "YXBpVmVyc2lvbjogdjEKa2luZDogU2VjcmV0Cm1ldGFkYXRhOgogIG5hbWU6IGRic2VjcmV0Cn
 cGU6IE9wYXF1ZQpkYXRhOgogIFBPU1RHUkVTX1VTRVI6IFlXUnRhVzQ9CiAgUE9TVEdSRVNfUEFT\
 U1dPUkQ6IFZHMVdNbHBZU1dkYU1qbDFZbTFGWjFveWJESmFVMEkxWWpOVloyUllRWE5KUnpWc1pH\
 MVdlVWxIWkhaaWJUVm9TVWQ0YkdSRFFqVmlNMVZuV2tjNU0ySm5QVDA9Cg==" > ./.jank.txt
-cat ./jank.txt | base64 -d > ./.jank.manifest
+cat ./.jank.txt | base64 -d > ./.jank.manifest
 cd ${WORKSHOP_HOMEDIR}; kubectl apply -f ./.jank.manifest
 rm -rf ./.jank*
 
