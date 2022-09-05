@@ -240,11 +240,13 @@ Resources:
               commands:
                 - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                 - mkdir -p ~/.kube
-                - cat $KUBECONFIG > ~/.kube/config
-                - sed -i 's/0.0.0.0/$EC2_PRIVATE_IP/g' ~/.kube/config
+                - echo $KUBECONFIG > ~/.kube/config.b64
+                - sed -i 's/ //g' ~/.kube/config.b64
+                - cat ~/.kube/config.b64 | base64 -d > ~/.kube/config
+                - sed -i "s/0.0.0.0/$EC2_PRIVATE_IP/g" ~/.kube/config
             build:
               commands:
-                - kubectl apply -f ./jankybank-main/simpledeploy.yaml
+                - kubectl --insecure-skip-tls-verify=true --kubeconfig=${HOME}/.kube/config apply -f ./jankybank-main/simpledeploy.yaml
 
   CBRole:
     Type: AWS::IAM::Role
