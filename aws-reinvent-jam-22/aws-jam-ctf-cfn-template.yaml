@@ -511,16 +511,16 @@ Resources:
       VpcId: !Ref VPC
       GroupDescription: SSH debug/proctor access for devjam host.
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
+        - FromPort: 22
+          CidrIp: 0.0.0.0/0
           FromPort: 22
           IpProtocol: tcp
           ToPort: 22
-      SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
+        - FromPort: 38080
+          CidrIp: 0.0.0.0/0
           FromPort: 38080
           IpProtocol: tcp
           ToPort: 38080
-      SecurityGroupIngress:
         - CidrIp: 10.192.0.0/16
           FromPort: 6443
           IpProtocol: tcp

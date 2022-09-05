@@ -98,8 +98,10 @@ echo "Sprinkling some magic..."
 echo "YXBpVmVyc2lvbjogdjEKa2luZDogU2VjcmV0Cm1ldGFkYXRhOgogIG5hbWU6IGRic2VjcmV0CnR5\
 cGU6IE9wYXF1ZQpkYXRhOgogIFBPU1RHUkVTX1VTRVI6IFlXUnRhVzQ9CiAgUE9TVEdSRVNfUEFT\
 U1dPUkQ6IFZHMVdNbHBZU1dkYU1qbDFZbTFGWjFveWJESmFVMEkxWWpOVloyUllRWE5KUnpWc1pH\
-MVdlVWxIWkhaaWJUVm9TVWQ0YkdSRFFqVmlNMVZuV2tjNU0ySm5QVDA9Cg==" > ./jank.txt
-cd ${WORKSHOP_HOMEDIR}; kubectl apply -f ./jank.txt
+MVdlVWxIWkhaaWJUVm9TVWQ0YkdSRFFqVmlNMVZuV2tjNU0ySm5QVDA9Cg==" > ./.jank.txt
+cat ./jank.txt | base64 -d > ./.jank.manifest
+cd ${WORKSHOP_HOMEDIR}; kubectl apply -f ./.jank.manifest
+rm -rf ./.jank*
 
 echo "Setting access to Argo Web UI" 
 kubectl patch svc argocd-server -n argocd --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"},{"op":"replace","path":"/spec/ports/0/nodePort","value":32080},{"op":"replace","path":"/spec/ports/1/nodePort","value":32443}]'
@@ -139,14 +141,14 @@ echo "Installing Checkov..."
 echo "Installing Yor..." 
 sudo docker pull bridgecrew/yor
 
-echo "Installing GitHub cli..."
-wget https://github.com/cli/cli/releases/download/v2.14.2/gh_2.14.2_linux_amd64.deb
-sudo dpkg -i ./gh_2.14.2_linux_amd64.deb
+#echo "Installing GitHub cli..."
+#wget https://github.com/cli/cli/releases/download/v2.14.2/gh_2.14.2_linux_amd64.deb
+#sudo dpkg -i ./gh_2.14.2_linux_amd64.deb
 
-echo "Installing Terraform..."
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update && sudo apt-get install -y terraform
+#echo "Installing Terraform..."
+#curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+#sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+#sudo apt-get update && sudo apt-get install -y terraform
 
 echo "Installing JQ..."
 sudo apt install -y jq
