@@ -246,7 +246,7 @@ Resources:
                 - sed -i "s/0.0.0.0/$EC2_PRIVATE_IP/g" ~/.kube/config
             build:
               commands:
-                - kubectl --insecure-skip-tls-verify=true --kubeconfig=${HOME}/.kube/config apply -f ./jankybank-main/simpledeploy.yaml
+                - kubectl --insecure-skip-tls-verify=true --kubeconfig=$HOME/.kube/config apply -f ./jankybank-main/simpledeploy.yaml
 
   CBRole:
     Type: AWS::IAM::Role
