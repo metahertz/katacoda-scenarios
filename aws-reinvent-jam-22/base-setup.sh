@@ -50,28 +50,28 @@ nodes:
     hostPort: 32443
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38080
-    hostPort: 38080
+  - containerPort: 30080
+    hostPort: 30080
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38081
-    hostPort: 38081
+  - containerPort: 30081
+    hostPort: 30081
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38082
-    hostPort: 38082
+  - containerPort: 30082
+    hostPort: 30082
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38083
-    hostPort: 38083
+  - containerPort: 30083
+    hostPort: 30083
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38084
-    hostPort: 38084
+  - containerPort: 30084
+    hostPort: 30084
     listenAddress: "0.0.0.0"
     protocol: tcp
-  - containerPort: 38085
-    hostPort: 38085
+  - containerPort: 30085
+    hostPort: 30085
     listenAddress: "0.0.0.0"
     protocol: tcp
 - role: worker
