@@ -592,7 +592,7 @@ Resources:
   Cloud9EC2InstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cloud9-ec2-instance-role
+      RoleName: ctfc9-ec2-instance-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -649,7 +649,7 @@ Resources:
   Cloud9EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties: 
-      InstanceProfileName: cloud9-ec2-instance-profile
+      InstanceProfileName: ctfc9-ec2-instance-profile
       Path: /
       Roles: 
        - !Ref Cloud9EC2InstanceRole
