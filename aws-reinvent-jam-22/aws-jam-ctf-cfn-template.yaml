@@ -692,13 +692,11 @@ Resources:
             #!/bin/bash -xe
             git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
             AWS_ACCOUNT_ID=${account_id}
-            AWS_REGION=${aws_region}
-            sudo python3 ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${LabUserRoleName} ${AWSAssumedUser} $AWS_REGION
+            sudo python3 ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${LabUserRoleName} ${AWSAssumedUser} ${AWS::Region}
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/base-setup-c9.sh
             sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/personalize.sh
           - account_id: !Ref "AWS::AccountId"
-          - aws_region: !Ref "AWS::Region"
       InstanceType: !Ref InstanceType
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
       IamInstanceProfile: !Ref Cloud9EC2InstanceProfile

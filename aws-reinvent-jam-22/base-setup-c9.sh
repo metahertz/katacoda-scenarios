@@ -33,9 +33,9 @@ cp /lib/terminfo/x/xterm-color /home/ubuntu/.terminfo/x/xterm-color
 
 
 echo "Cloning CTF attack tools..."
-git clone https://github.com/eurogig/log4sheller.git
-chown -R ubuntu ./log4sheller
-cd ./log4sheller ; sudo bash init.sh    
+cd /home/ubuntu; git clone https://github.com/eurogig/log4sheller.git
+chown -R ubuntu /home/ubuntu/log4sheller
+cd /home/ubuntu/log4sheller ; sudo bash init.sh    
 
 echo "Installing Yor..." 
 sudo docker pull bridgecrew/yor
