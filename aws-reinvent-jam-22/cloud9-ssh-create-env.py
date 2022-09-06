@@ -21,6 +21,7 @@ ec2MetaIamRoleName = 'ctfc9-ec2-instance-role'
 awsOrgID = sys.argv[1]
 awsRoleID = sys.argv[2]
 awsAssumedUser = sys.argv[3]
+awsRegion = sys.argv[4]
 
 # Read EC2 IAM profile for creds, fallback to ENV
 try:
@@ -52,7 +53,7 @@ except:
 
 method = 'POST'
 service = 'cloud9'
-region = 'us-west-2'
+region = awsRegion
 host = f'{service}.{region}.amazonaws.com'
 endpoint = f'https://{service}.{region}.amazonaws.com/'
 content_type = 'application/x-amz-json-1.1'
