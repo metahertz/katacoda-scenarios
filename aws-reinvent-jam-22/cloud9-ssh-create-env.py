@@ -15,7 +15,7 @@ cloud9SshPort = "22"
 cloud9SshLoginName = "ubuntu"
 
 # EC2 Credentials role name
-ec2MetaIamRoleName = 'cloud9-ec2-instance-role'
+ec2MetaIamRoleName = 'ctfc9-ec2-instance-role'
 
 # Read in the AWS Account ID and user details so we can add the end user to the Cloud9 env
 awsOrgID = sys.argv[1]
