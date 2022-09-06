@@ -4,6 +4,10 @@ WORKSHOP_HOMEDIR=/home/${WORKSHOP_USER}
 WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
 
 mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
+
+echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
+echo 'APT::Periodic::Unattended-Upgrade "0";' >>  /etc/apt/apt.conf.d/20auto-upgrades
+
 sudo apt-get update
 
 echo "Configuring KIND cluster environment..." 

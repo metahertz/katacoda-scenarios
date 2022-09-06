@@ -6,6 +6,10 @@ WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
 mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
 sudo apt-get update
 
+
+echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
+echo 'APT::Periodic::Unattended-Upgrade "0";' >>  /etc/apt/apt.conf.d/20auto-upgrades
+
 echo "Extracting TGZ of Cloud9 compile/setup dir to save time..."
 #apt install -y python2 
 #curl -L https://raw.githubusercontent.com/c9/install/master/install.sh | bash &
