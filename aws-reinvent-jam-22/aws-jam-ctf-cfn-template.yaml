@@ -1,6 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Prisma Cloud Jam for Log4J CTF
 
+Mappings: 
+  RegionMap: 
+    us-east-2: 
+      "HVM64": "ami-0471a9f6457cab1c9"
+    us-west-2: 
+      "HVM64": "ami-0596ebedeeceb8c18"
+
 Parameters:
   VpcCIDR:
     Type: String
@@ -551,13 +558,11 @@ Resources:
             #!/bin/bash -xe
             git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
             AWS_ACCOUNT_ID=${account_id}
-            sudo python3 ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${LabUserRoleName} ${AWSAssumedUser}
             sudo chmod +x ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/*.sh
             sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/base-setup.sh
-            sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/personalize.sh
           - account_id: !Ref "AWS::AccountId"
       InstanceType: !Ref InstanceType
-      ImageId: ami-0c943b80df4b831ee
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
       IamInstanceProfile: !Ref CtfEc2InstanceProfile
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
@@ -584,6 +589,142 @@ Resources:
         - Key: kind
           Value: yes
 
+  Cloud9EC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cloud9-ec2-instance-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: allow-cloud9-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "cloud9:CreateEnvironmentSSH"
+                  - "cloud9:CreateEnvironmentToken"
+                  - "cloud9:DescribeEnvironments"
+                  - "cloud9:DescribeSSHRemote"
+                  - "cloud9:GetUserPublicKey"
+                  - "cloud9:ListEnvironments"
+                  - "cloud9:ValidateEnvironmentName"
+                  - "cloud9:CreateEnvironmentMembership"
+                Resource: '*'
+        - PolicyName: allow-edit-sg
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "ec2:DescribeSecurityGroupReferences"
+                  - "ec2:DescribeSecurityGroupRules"
+                  - "ec2:DescribeSecurityGroups"
+                  - "ec2:ModifySecurityGroupRules"
+                Resource: "*"
+        - PolicyName: allow-eks-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "eks:*"
+                Resource: '*'
+        - PolicyName: put-parameter
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "ssm:PutParameter"
+                Resource: '*'
+      Path: /
+  Cloud9EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: workshop-ec2-instance-profile
+      Path: /
+      Roles: 
+       - !Ref Cloud9EC2InstanceRole
+  Cloud9EC2SG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: SSH debug/proctor access for devjam host.
+      SecurityGroupIngress:
+        - FromPort: 22
+          CidrIp: 0.0.0.0/0
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIp: 10.192.0.0/16
+          FromPort: 0
+          IpProtocol: tcp
+          ToPort: 65535
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          IpProtocol: "-1"
+          ToPort: 65535
+      Tags:
+        - Key: usage
+          Value: PaloAlto DevJam CTF 
+        - Key: createdby
+          Value: Cloudformation
+        - Key: type
+          Value: ctf-reinvent-22
+        - Key: moreinfo
+          Value: workshop.bridgecrew.io
+  Cloud9EC2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      KeyName: !Ref KeyName
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash -xe
+            git clone https://github.com/metahertz/kubernetes-devsecops-workshop.git
+            AWS_ACCOUNT_ID=${account_id}
+            sudo python3 ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/cloud9-ssh-create-env.py $AWS_ACCOUNT_ID ${LabUserRoleName} ${AWSAssumedUser}
+            sudo chmod +x ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/*.sh
+            sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/base-setup-c9.sh
+            sudo ./kubernetes-devsecops-workshop/aws-reinvent-jam-22/personalize.sh
+          - account_id: !Ref "AWS::AccountId"
+      InstanceType: !Ref InstanceType
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
+      IamInstanceProfile: !Ref Cloud9EC2InstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: '100'
+            DeleteOnTermination: 'true'
+            Encrypted: 'false'
+      NetworkInterfaces:
+        - DeviceIndex: '0'
+          AssociatePublicIpAddress: 'true'
+          GroupSet:
+            - !Ref Cloud9EC2SG
+          SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: usage
+          Value: PaloAlto DevJam CTF 
+        - Key: createdby
+          Value: Cloudformation
+        - Key: type
+          Value: ctf-reinvent-22
+        - Key: moreinfo
+          Value: workshop.bridgecrew.io
+        - Key: kind
+          Value: yes
+
 Outputs:
   KeyName:
     Description: The SSH KeyPair Name
@@ -591,9 +732,15 @@ Outputs:
   Cloud9URL:
     Description: Cloud9 Environment Access
     Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloud9/home/account'
-  HackerIp:
+  Cloud9IP:
     Description: CTF (Hacker) IP
-    Value: !GetAtt CtfEC2.PrivateIp
-  ingressURI:
+    Value: !GetAtt Cloud9EC2.PrivateIp
+  Log4jankyBank:
     Description: JankyBank URL
     Value:  !Join [ "", [ "http://", !GetAtt CtfEC2.PublicIp, ":30080" ] ]
+  NetCatPort:
+    Description: Port to use for inbound NetCat
+    Value: "10000-20000"
+  WebPort:
+    Description: Port to use for inbound LDAP Second stage loader webserver
+    Value: "20000-30000"
