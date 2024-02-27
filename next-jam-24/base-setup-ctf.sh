@@ -1,9 +1,18 @@
 #!/usr/bin/bash
 WORKSHOP_USER=ubuntu
 WORKSHOP_HOMEDIR=/home/${WORKSHOP_USER}
-WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.bcworkshop
+WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.panworkshop
 
 mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
+
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/bin/kind
+
+echo "Installing kubectl cli..."
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/bin/kubectl
 
 echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
 echo 'APT::Periodic::Unattended-Upgrade "0";' >>  /etc/apt/apt.conf.d/20auto-upgrades
@@ -62,11 +71,6 @@ EOF
 echo "Setting up KIND cluster..."
 cd ${WORKSHOP_AUTOMATION_DIR}; sudo /usr/bin/kind create cluster --name bridgecrew-workshop --config=kind-config.yaml
 
-#echo "Installing kubectl cli..."
-#curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-#chmod +x ./kubectl
-#sudo mv ./kubectl /usr/bin/kubectl
-
 echo "Providing ${WORKSHOP_USER} access to KIND cluster..."
 cd ${WORKSHOP_HOMEDIR}; sudo cp -rfv /root/.kube /home/${WORKSHOP_USER}/.kube
 cd ${WORKSHOP_HOMEDIR}; sudo chown -R ${WORKSHOP_USER} /home/${WORKSHOP_USER}/.kube
@@ -119,18 +123,15 @@ echo "Fixing up botocore dep version for checkov see https://github.com/aws/aws-
 sudo apt -y remove python3-botocore
 pip3 install botocore
 
-echo "Fixup AWSCLI install.."
-sudo apt install -y awscli
-sudo pip3 install --upgrade awscli
-
-echo "Pushing Kubeconfig to SSM for CI.."
-sudo aws ssm put-parameter \
-    --region $(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region) \
-    --name KUBECONFIG \
-    --type SecureString \
-    --key-id alias/aws/ssm \
-    --value "$(sudo cat /root/.kube/config | base64)" \
-    --tier Advanced
+#TODO GCP-IFY THIS
+# echo "Pushing Kubeconfig to SSM for CI.."
+# sudo aws ssm put-parameter \
+#     --region $(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region) \
+#     --name KUBECONFIG \
+#     --type SecureString \
+#     --key-id alias/aws/ssm \
+#     --value "$(sudo cat /root/.kube/config | base64)" \
+#     --tier Advanced
 
 echo "Sprinkling more magic..."
 # This is NOT a real secret (i'm looking at you checkov) it's just for a CTF "Flag"
