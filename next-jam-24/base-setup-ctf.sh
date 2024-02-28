@@ -17,7 +17,8 @@ sudo mv ./kubectl /usr/bin/kubectl
 echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
 echo 'APT::Periodic::Unattended-Upgrade "0";' >>  /etc/apt/apt.conf.d/20auto-upgrades
 
-sudo apt-get update
+apt install -y python3-pip && pip3 install --upgrade requests & 
+
 
 echo "Configuring KIND cluster environment..." 
 cat > ${WORKSHOP_AUTOMATION_DIR}/kind-config.yaml << EOF
