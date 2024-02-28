@@ -5,7 +5,7 @@ WORKSHOP_AUTOMATION_DIR=${WORKSHOP_HOMEDIR}/.panworkshop
 
 mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
 
-apt install -y podman-docker
+apt install -y docker.io
 
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
 chmod +x ./kind
