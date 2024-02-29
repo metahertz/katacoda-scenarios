@@ -4,6 +4,28 @@ provider "google" {
   region      = "us-central1"  # Change to your desired region
 }
 
+## Google API Resources need enabling
+
+
+resource "google_project_service" "crm_api" {
+  service = "cloudresourcemanager.googleapis.com"
+  disable_dependent_services = true
+}
+
+resource "time_sleep" "gcp_wait_crm_api_enabling" {
+  depends_on = [
+    google_project_service.crm_api
+  ]
+  create_duration = "1m"
+}
+
+resource "google_project_service" "cloudbuild_service" {
+  service = "cloudbuild.googleapis.com"
+  depends_on = [time_sleep.gcp_wait_crm_api_enabling]
+  disable_dependent_services = true
+}
+
+
 resource "google_compute_network" "panw_ctf_network" {
   name = "panw-ctf-network"
 }
@@ -94,3 +116,19 @@ resource "google_compute_firewall" "allow_ssh" {
 
 
 
+#resource "google_container_registry" "gcr" {
+#}
+
+resource "google_cloudbuild_trigger" "build_trigger" {
+  depends_on = [google_project_service.cloudbuild_service]
+  name     = "rebuild-bank"
+
+  description = "Trigger a rebuild of Jankybank containers"
+
+  filename = "cloudbuild.yaml"  # Replace with your Cloud Build configuration file
+
+  trigger_template {
+    branch_name       = "master"  # Replace with the branch you want to trigger the build on
+  }
+
+}
