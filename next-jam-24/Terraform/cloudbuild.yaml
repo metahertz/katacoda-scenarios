@@ -1,0 +1,12 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/${PROJECT_ID}/jankybank-dockerized', '.']
+images:
+- 'gcr.io/${PROJECT_ID}/your-app'
+
+options:
+  #machineType: 'N1_HIGHCPU_8'  # Default is smaller 1VCPU machine
+  substitutionOption: 'ALLOW_LOOSE'
+
+substitutions:
+  _GCR_HOST: 'gcr.io/${PROJECT_ID}'
