@@ -126,6 +126,17 @@ echo "Fixing up botocore dep version for checkov see https://github.com/aws/aws-
 sudo apt -y remove python3-botocore
 pip3 install botocore
 
+## Deploy Jankybank CTF user Git Repo (GCP Source Repository)
+wget https://github.com/eurogig/jankybank/archive/refs/tags/0.1.tar.gz -O janky.tar.gz
+gcloud source repos clone jankybank # Instance Service account allowed access.
+tar -xzvf janky.tar.gz
+cp -rvf jankybank-0.1/* jankybank/.
+echo "Configuring git.."
+git config --global user.email "ctf-bank-authors@pan.dev"
+git config --global user.name "Palo CTF Bank Authors"
+cd jankybank ; git add -A . ; git commit -m "the bank is jank!"; git push
+kubectl apply -f simpledeploy.yaml
+
 #TODO GCP-IFY THIS
 # echo "Pushing Kubeconfig to SSM for CI.."
 # sudo aws ssm put-parameter \
