@@ -119,6 +119,9 @@ data:
 EOF
 kubectl apply -f ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml
 
+# Allow GCR.IO Project access for kind cluster
+sudo gcloud auth configure-docker gcr.io --quiet
+
 echo "Installing JQ..."
 sudo apt install -y jq
 
