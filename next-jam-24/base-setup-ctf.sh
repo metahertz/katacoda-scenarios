@@ -130,7 +130,7 @@ sudo apt -y remove python3-botocore
 pip3 install botocore
 
 ## Deploy Jankybank CTF user Git Repo (GCP Source Repository)
-wget https://github.com/metahertz/jankybank/archive/refs/tags/0.2.tar.gz -O janky.tar.gz
+wget https://github.com/eurogig/jankybank/archive/refs/tags/0.2.tar.gz -O janky.tar.gz
 gcloud source repos clone jankybank # Instance Service account allowed access.
 tar -xzvf janky.tar.gz
 cp -rvf jankybank-0.2/* jankybank/.
