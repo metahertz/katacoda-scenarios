@@ -46,6 +46,12 @@ resource "google_project_service" "cloudbuild_service" {
   disable_dependent_services = true
 }
 
+resource "google_project_service" "secretmanager_service" {
+  service = "secretmanager.googleapis.com"
+  depends_on = [time_sleep.gcp_wait_crm_api_enabling]
+  disable_dependent_services = true
+}
+
 
 ## Service Accounts
 
@@ -199,6 +205,7 @@ resource "google_cloudbuild_trigger" "build_trigger" {
 }
 
 resource "google_secret_manager_secret" "cve-scan-pan-token" {
+  depends_on = [google_project_service.secretmanager_service]
   secret_id = "checkov-cve-scan-token"
 
   labels = {
@@ -218,6 +225,7 @@ resource "google_secret_manager_secret" "cve-scan-pan-token" {
 }
 
 resource "google_secret_manager_secret" "lab-deploy-k8s-token" {
+  depends_on = [google_project_service.secretmanager_service]
   secret_id = "lab-deploy-k8s-token"
 
   labels = {
