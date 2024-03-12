@@ -10,6 +10,7 @@ provider "google" {
 resource "google_project_service" "crm_api" {
   service = "cloudresourcemanager.googleapis.com"
   disable_dependent_services = true
+  project = var.gcp_project_name
 }
 
 resource "time_sleep" "gcp_wait_crm_api_enabling" {
@@ -19,10 +20,18 @@ resource "time_sleep" "gcp_wait_crm_api_enabling" {
   create_duration = "1m"
 }
 
+resource "google_project_service" "compute_service" {
+  depends_on = [time_sleep.gcp_wait_crm_api_enabling]
+  service = "compute.googleapis.com"
+  disable_dependent_services = true
+  project = var.gcp_project_name
+}
+
 resource "google_project_service" "source_repo" {
   depends_on = [time_sleep.gcp_wait_crm_api_enabling]
   service = "sourcerepo.googleapis.com"
   disable_dependent_services = true
+  project = var.gcp_project_name
 }
 
 resource "google_project_service" "iam" {
@@ -96,6 +105,9 @@ resource "google_compute_instance" "panw_ctf_ui" {
     scopes = ["cloud-platform"]
   }
 
+  metadata = {
+    "ssh-keys" = "matt:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDNzN/MyVI8KSzQnVOAG7TMtzAvLUo9mtJjmH0XBjOJlPO0BBjeb/izKR9zBkvap/fW9GfmVmuec5Y8N+i4DHTWmtE3Q8eWSeEOhryoPo+a+1AWmm/p0kC4xczzOgrSNrdvs5POmZrd/QLEDPtPgWlq6ib94gSmw4dNafeX3Co/CdPpnBlwrw/gh/RMWHAS0nVKKGmiUiAGEUPPBRNYc6EG7/wabm3meC/TNZ2jmQPrTGodapd/7r3Z930HeVf3jqi0Bs0mKBtFm9WTOWWPMAqaUI+eegnQRHapHi6/uxisVWsJHxEiPmm628YPWm+UkR3hTWLTojVPN0TXAJCbChgx1T0obtXx/mJ8zYFmFahJiBjfL3GWvgl9oRiVFRAHXMgV47Z6AHs+ZMk+L1PmUq9F74Pvpr+RK0AZK2LxER6mrHVB0IKNrp44DTvy81WmXgp8WZ31OLY3T2C//kgi2XfjmHxRQlIt+FgPfnmBvqdafq3km78rCQsq6t63DzqsDjCrPbiue4mMhNuYy4wVSj7mAJG4OM+PZUs6NUzQUzUk+X0XdxQwsjmWtUEprLVo7aHeLqkvOMCRvF9BnWiEBDBju+/5i/2vK39485c2X4fnZPERugidxoJXg3u3sl5Y++2+RdnyLxHbD2WqSMJGn+3YsSJnr6GCCtBHOh3Y/9nqEQ== matt@MJ_NG_PERSONAL"
+  }
   metadata_startup_script = <<-EOF
     #!/bin/bash -xe
     # Cloud-init script for panw_ctf_ui
@@ -181,6 +193,45 @@ resource "google_cloudbuild_trigger" "build_trigger" {
 
   trigger_template {
     branch_name       = "master"  # Replace with the branch you want to trigger the build on
+    repo_name         = "jankybank"
   }
 
+}
+
+resource "google_secret_manager_secret" "cve-scan-pan-token" {
+  secret_id = "checkov-cve-scan-token"
+
+  labels = {
+    label = "scan-token"
+  }
+
+  replication {
+    user_managed {
+      replicas {
+        location = "us-central1"
+      }
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+}
+
+resource "google_secret_manager_secret" "lab-deploy-k8s-token" {
+  secret_id = "lab-deploy-k8s-token"
+
+  labels = {
+    label = "deploy-token"
+  }
+
+  replication {
+    user_managed {
+      replicas {
+        location = "us-central1"
+      }
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
 }

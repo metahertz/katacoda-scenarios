@@ -127,10 +127,10 @@ sudo apt -y remove python3-botocore
 pip3 install botocore
 
 ## Deploy Jankybank CTF user Git Repo (GCP Source Repository)
-wget https://github.com/eurogig/jankybank/archive/refs/tags/0.1.tar.gz -O janky.tar.gz
+wget https://github.com/metahertz/jankybank/archive/refs/tags/0.2.tar.gz -O janky.tar.gz
 gcloud source repos clone jankybank # Instance Service account allowed access.
 tar -xzvf janky.tar.gz
-cp -rvf jankybank-0.1/* jankybank/.
+cp -rvf jankybank-0.2/* jankybank/.
 echo "Configuring git.."
 git config --global user.email "ctf-bank-authors@pan.dev"
 git config --global user.name "Palo CTF Bank Authors"
