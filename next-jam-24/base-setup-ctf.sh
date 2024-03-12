@@ -137,15 +137,9 @@ git config --global user.name "Palo CTF Bank Authors"
 cd jankybank ; git add -A . ; git commit -m "the bank is jank!"; git push
 kubectl apply -f simpledeploy.yaml
 
-#TODO GCP-IFY THIS
-# echo "Pushing Kubeconfig to SSM for CI.."
-# sudo aws ssm put-parameter \
-#     --region $(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region) \
-#     --name KUBECONFIG \
-#     --type SecureString \
-#     --key-id alias/aws/ssm \
-#     --value "$(sudo cat /root/.kube/config | base64)" \
-#     --tier Advanced
+echo "Pushing Kubeconfig to GCloud Secrets manager for CI.."
+sudo gcloud secrets versions add lab-deploy-k8s-token --data-file=/root/.kube/config
+sudo gcloud secrets versions list SECRET_NAME
 
 echo "Sprinkling more magic..."
 # This is NOT a real secret (i'm looking at you checkov) it's just for a CTF "Flag"
