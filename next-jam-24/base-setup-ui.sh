@@ -18,5 +18,5 @@ cd ${WORKSHOP_HOMEDIR}/log4sheller ; sudo bash init.sh
 
 
 cd ${WORKSHOP_AUTOMATION_DIR}; curl -fsSL https://code-server.dev/install.sh | sh
-cd ${WORKSHOP_AUTOMATION_DIR}; nohup code-server --auth none --bin-addr 0.0.0.0:8081 &
+cd ${WORKSHOP_AUTOMATION_DIR} systemctl enable --now code-server@${WORKSHOP_USER}
 
