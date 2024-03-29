@@ -12,9 +12,9 @@ sudo apt-get update
 sudo apt install python3
 
 echo "Cloning CTF attack tools..."
-cd ${WORKSHOP_AUTOMATION_DIR}; git clone https://github.com/eurogig/log4sheller.git
-chmod -R 777 ${WORKSHOP_AUTOMATION_DIR}/log4sheller
-cd ${WORKSHOP_AUTOMATION_DIR}/log4sheller ; sudo bash init.sh   
+cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/eurogig/log4sheller.git
+chmod -R 777 ${WORKSHOP_HOMEDIR}/log4sheller
+cd ${WORKSHOP_HOMEDIR}/log4sheller ; sudo bash init.sh   
 
 
 cd ${WORKSHOP_AUTOMATION_DIR}; curl -fsSL https://code-server.dev/install.sh | sh
