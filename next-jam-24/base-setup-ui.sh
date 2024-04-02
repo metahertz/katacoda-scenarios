@@ -10,6 +10,8 @@ mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
 sudo apt-get update
 
 sudo apt install python3
+sudo apt python3 -m pip install requests
+sudo apt python3 -m pip install google.cloud.storage
 
 echo "Cloning CTF attack tools..."
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/eurogig/log4sheller.git
@@ -36,3 +38,8 @@ EOF
 
 sudo systemctl daemon-reload
 cd ${WORKSHOP_AUTOMATION_DIR}; sudo systemctl enable --now code-server@${WORKSHOP_USER}
+
+git config --global user.email “ctf-user@pan.dev"
+git config --global user.name "PaloCTF User”
+cd ${WORKSHOP_HOMEDIR}; gcloud source repos clone jankybank
+chmod -R 777 ${WORKSHOP_HOMEDIR}/jankybank
