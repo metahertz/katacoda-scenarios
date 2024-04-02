@@ -18,5 +18,20 @@ cd ${WORKSHOP_HOMEDIR}/log4sheller ; sudo bash init.sh
 
 
 cd ${WORKSHOP_AUTOMATION_DIR}; curl -fsSL https://code-server.dev/install.sh | sh
-cd ${WORKSHOP_AUTOMATION_DIR} systemctl enable --now code-server@${WORKSHOP_USER}
 
+cat > '/usr/lib/systemd/system/code-server@.service' << EOF
+[Unit]
+Description=code-server
+After=network.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/code-server --auth none --host 0.0.0.0
+Restart=always
+User=%i
+
+[Install]
+WantedBy=default.target
+EOF
+
+cd ${WORKSHOP_AUTOMATION_DIR} systemctl enable --now code-server@${WORKSHOP_USER}
