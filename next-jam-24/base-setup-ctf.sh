@@ -144,6 +144,13 @@ echo "Pushing Kubeconfig to GCloud Secrets manager for CI.."
 sudo gcloud secrets versions add lab-deploy-k8s-token --data-file=/root/.kube/config
 sudo gcloud secrets versions list SECRET_NAME
 
+echo "Setting up progress DB.."
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+sudo apt-get update && sudo apt-get install -y google-cloud-cli
+sudo apt-get install -y google-cloud-cli-cbt 
+cbt -instance ctf-status createtable progress
+
 echo "Sprinkling more magic..."
 # This is NOT a real secret (i'm looking at you checkov) it's just for a CTF "Flag"
 echo "Q29uZ3JhdHMhICBZb3UndmUgZm91bmQgYSBmbGFnClRtVjJaWElnWjI5dWJtRWdjblZ1SUdGeWIzVnVaQ0JoYm1Rc0lHUmxjMlZ5ZENCNWIzVT0K" | base64 -d >> /root/.ssh/authorized_keys
