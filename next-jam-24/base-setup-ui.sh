@@ -34,4 +34,5 @@ User=%i
 WantedBy=default.target
 EOF
 
-cd ${WORKSHOP_AUTOMATION_DIR} systemctl enable --now code-server@${WORKSHOP_USER}
+sudo systemctl daemon-reload
+cd ${WORKSHOP_AUTOMATION_DIR}; sudo systemctl enable --now code-server@${WORKSHOP_USER}
