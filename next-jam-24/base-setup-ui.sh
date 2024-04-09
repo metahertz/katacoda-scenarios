@@ -10,8 +10,8 @@ mkdir -p ${WORKSHOP_AUTOMATION_DIR} || true
 sudo apt-get update
 
 sudo apt install python3
-sudo apt python3 -m pip install requests
-sudo apt python3 -m pip install google.cloud.storage
+sudo python3 -m pip install requests
+sudo python3 -m pip install google.cloud.storage
 
 echo "Cloning CTF attack tools..."
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/eurogig/log4sheller.git
@@ -20,7 +20,7 @@ cd ${WORKSHOP_HOMEDIR}/log4sheller ; sudo bash init.sh
 
 
 cd ${WORKSHOP_AUTOMATION_DIR}; curl -fsSL https://code-server.dev/install.sh | sh
-
+sudo apt
 cat > '/usr/lib/systemd/system/code-server@.service' << EOF
 [Unit]
 Description=code-server
