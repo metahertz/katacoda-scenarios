@@ -35,7 +35,7 @@ networking:
 nodes:
 - role: control-plane
   extraPortMappings:
-  - containerPort: 32080
+  - containerPort: 30080
     hostPort: 32080
     listenAddress: "0.0.0.0"
     protocol: tcp
