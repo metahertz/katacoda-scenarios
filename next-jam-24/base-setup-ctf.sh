@@ -119,6 +119,27 @@ data:
 EOF
 kubectl apply -f ${WORKSHOP_AUTOMATION_DIR}/kind-metallb-config.yaml
 
+cat > '/usr/lib/systemd/system/activityctf.service' << EOF
+[Unit]
+Description=activity-tracking-ctf
+After=network.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/python3 /kubernetes-devsecops-workshop/next-jam-24/activity.py
+Restart=always
+User=%i
+
+[Install]
+WantedBy=default.target
+EOF
+
+sudo python3 -m pip install flask google.cloud.bigtable
+
+sudo systemctl daemon-reload
+sudo systemctl enable activityctf.service
+sudo systemctl start activityctf.service
+
 # Allow GCR.IO Project access for kind cluster
 sudo gcloud auth configure-docker gcr.io --quiet
 
