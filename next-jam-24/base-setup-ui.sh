@@ -11,9 +11,11 @@ sudo apt-get update
 
 sudo apt install python3
 sudo python3 -m pip install requests
-sudo python3 -m pip install google.cloud.storage
 sudo cp /kubernetes-devsecops-workshop/next-jam-24/submitflag.py /usr/bin/submitflag
 sudo chmod +x /usr/bin/submitflag
+sudo python3 -m pip install google-cloud
+sudo python3 -m pip install google-cloud-vision
+sudo python3 -m pip install google.cloud.storage
 
 echo "Cloning CTF attack tools..."
 cd ${WORKSHOP_HOMEDIR}; git clone https://github.com/eurogig/log4sheller.git
