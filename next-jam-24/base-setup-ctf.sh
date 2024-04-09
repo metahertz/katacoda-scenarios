@@ -128,7 +128,6 @@ After=network.target
 Type=exec
 ExecStart=/usr/bin/python3 /kubernetes-devsecops-workshop/next-jam-24/activity.py
 Restart=always
-User=%i
 
 [Install]
 WantedBy=default.target
