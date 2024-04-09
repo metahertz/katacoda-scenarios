@@ -18,9 +18,14 @@ table = instance.table(table_id)
 
 # Dict lookup for simple CTF flag responder.
 flagdata = {
-    "apple": "1",
-    "banana": "2",
-    "orange": "3"
+    "ipchange": "1",
+    "The username/password you entered was invalid. We have logged your information for security purposes": "2",
+    "${jndx:ldxp://": "3",
+    "TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAsIG5ldmVyIGdvbm5hIGxldCB5b3UgZG93bg==": "4",
+    "Never gonna give you up, never gonna let you down":"4",
+    "TmV2ZXIgZ29ubmEgcnVuIGFyb3VuZCBhbmQsIGRlc2VydCB5b3U=": "5",
+    "- checkov -d . -o junitxml --bc-api-key $BC_API_KEY --repo-id $CODEBUILD_ACCOUNT_ID/$CODEBUILD_PROJECT --framework kubernetes sca_package -c 'CKV_K8S_16,CKV_CVE_2021*' > test_results.xml": "6",
+    "winning": "7"
 }
 
 # Function to look up input string in the dictionary
